@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Design\TokenSampleData.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DesignData Include="Design\TokenSampleData.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Connect4.Engine\Connect4.Engine.csproj" />
+  </ItemGroup>
+
+</Project>

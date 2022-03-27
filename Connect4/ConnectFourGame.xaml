@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="Connect4.ConnectFourGame"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Connect4"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="350"
+			 Background="{StaticResource DarkLigntBackground}"
+			 FontFamily="Noto Sans" Foreground="#CCC">
+
+	<Viewbox>
+		<Canvas Width="350" Height="300">
+			<UniformGrid x:Name="gameGrid"
+					 Width="350" Height="300"
+                     Columns="7" Rows="6">
+
+				<local:Token Style="{StaticResource PinkToken}"/>
+				<local:Token Style="{StaticResource RedToken}"/>
+				<local:Token Style="{StaticResource YellowToken}"/>
+				<local:Token Style="{StaticResource HiddenToken}"/>
+				<local:Token FrontColor="Transparent" BackColor="Transparent"/>
+			</UniformGrid>
+
+			<UniformGrid x:Name="hitTestGrid"
+					 Width="350" Height="300"
+                     Columns="7" Rows="1">
+
+				<Button Style="{StaticResource ColumnButton}"/>
+			</UniformGrid>
+
+			<Button Height="300" Width="350"
+					Style="{StaticResource InvisibleButton}" 
+					Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ConnectFourGame}}}"
+					Click="EndScreen_Click" Cursor="Hand">
+				<TextBlock x:Name="resultBadge" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24">
+					Red wins!
+				</TextBlock>
+			</Button>
+
+		</Canvas>
+	</Viewbox>
+
+</UserControl>

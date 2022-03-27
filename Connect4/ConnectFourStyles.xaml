@@ -47,8 +47,8 @@
 		</Style.Triggers>--><!--
 	</Style>-->
 
-	<Style TargetType="{x:Type Button}" x:Key="InvisibleButton">
-		<Setter Property="Background" Value="Transparent"/>
+	<Style TargetType="{x:Type Button}" x:Key="SemiTransparentButton">
+		<Setter Property="Background" Value="#44000000"/>
 		<Setter Property="BorderThickness" Value="0"/>
 		<Setter Property="Template">
 			<Setter.Value>
@@ -82,7 +82,22 @@
 		<Setter Property="FrontColor" Value="Transparent"/>
 		<Setter Property="BackColor" Value="Transparent"/>
 	</Style>
-	
+
+	<Style TargetType="{x:Type local:Token}" x:Key="PinkTokenInversed">
+		<Setter Property="FrontColor" Value="#FFE264E2"/>
+		<Setter Property="BackColor" Value="#FFA52FA5"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="RedTokenInversed">
+		<Setter Property="FrontColor" Value="#FFE26464"/>
+		<Setter Property="BackColor" Value="#FFA52F2F"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="YellowTokenInversed">
+		<Setter Property="FrontColor" Value="#FFFDEB23"/>
+		<Setter Property="BackColor" Value="#FFB39C30"/>
+	</Style>
+
 	<LinearGradientBrush x:Key="DarkLigntBackground" EndPoint="1,0" StartPoint="0,0.5">
 		<GradientStop Color="#15000000" Offset="0"/>
 		<GradientStop Color="#15FFFFFF" Offset="1"/>

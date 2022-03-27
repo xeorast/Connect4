@@ -299,6 +299,19 @@ public class Well
 
 	#endregion
 
+	/// <summary>
+	/// gets <see cref="IEnumerable{T}"/> of all fields attending in winning streak
+	/// </summary>
+	/// <returns>fields attending in streak</returns>
+	public IEnumerable<(int col, int row)> GetWinning()
+	{
+		return from col in Enumerable.Range( 0, Width )
+			   from row in Enumerable.Range( 0, Height )
+			   let hue = WellObj[col, row]
+			   where hue != Hue.None && IsFieldWinning( col, row, hue )
+			   select (col, row);
+	}
+
 
 	/// <summary>
 	/// checks if given column is full

@@ -30,7 +30,7 @@
 			</UniformGrid>
 
 			<Button Height="300" Width="350"
-					Style="{StaticResource InvisibleButton}" 
+					Style="{StaticResource SemiTransparentButton}" 
 					Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ConnectFourGame}}}"
 					Click="EndScreen_Click" Cursor="Hand">
 				<TextBlock x:Name="resultBadge" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24">

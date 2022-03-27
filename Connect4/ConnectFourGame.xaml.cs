@@ -126,6 +126,26 @@ public partial class ConnectFourGame : UserControl
 	}
 
 	/// <summary>
+	/// colors tokens attending in winning streak
+	/// </summary>
+	void ColorWinning()
+	{
+		if ( Game.Winner is Hue.None )
+		{
+			return;
+		}
+
+		var well = Game.CloneWell();
+		foreach ( (int col, int row) in well.GetWinning())
+		{
+			var hue = well.WellObj[col, row];
+
+			var key = GetNegativeTokenClass( hue );
+			Tokens[col,row].Style= Application.Current.Resources[key] as Style;
+		}
+	}
+
+	/// <summary>
 	/// performs move
 	/// </summary>
 	/// <param name="sender">button with <see cref="System.Windows.FrameworkElement.Tag"/> set to column index</param>
@@ -155,6 +175,7 @@ public partial class ConnectFourGame : UserControl
 	private void Game_GameEnded( Game sender, Hue winner )
 	{
 		ShowWinner( winner );
+		ColorWinning();
 	}
 
 	/// <summary>
@@ -188,6 +209,21 @@ public partial class ConnectFourGame : UserControl
 			Hue.Yellow => "YellowToken",
 			Hue.Red => "RedToken",
 			_ => "PinkToken",
+		};
+	}
+
+	/// <summary>
+	/// gets name of inversed token style corresponding to given color
+	/// </summary>
+	/// <param name="hue">color</param>
+	/// <returns></returns>
+	public static string GetNegativeTokenClass( Hue hue )
+	{
+		return hue switch
+		{
+			Hue.Yellow => "YellowTokenInversed",
+			Hue.Red => "RedTokenInversed",
+			_ => "PinkTokenInversed",
 		};
 	}
 

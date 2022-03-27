@@ -6,17 +6,38 @@
         xmlns:local="clr-namespace:Connect4"
         mc:Ignorable="d"
         Title="Connect4 by xeo" Height="450" Width="800" Background="#FF4B4DEC">
-    <Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition/>
-			<ColumnDefinition Width="auto"/>
-			<ColumnDefinition Width="10"/>
-			<ColumnDefinition Width="3*"/>
-			<ColumnDefinition/>
-		</Grid.ColumnDefinitions>
-		
-		<local:ConnectFourGame x:Name="c4" Grid.Column="1"/>
-		<local:StatusBar x:Name="status" Grid.Column="3"/>
 
-	</Grid>
+	<Window.CommandBindings>
+		<CommandBinding Command="New" Executed="New_Command_Executed"/>
+		<CommandBinding Command="local:MainWindow.ExitCmd" Executed="Exit_Command_Executed"/>
+		<CommandBinding Command="local:MainWindow.OptionsCmd" Executed="Options_Command_Executed"/>
+	</Window.CommandBindings>
+	
+	<DockPanel>
+
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="_Game" >
+				<MenuItem Command="New"/>
+				<Separator/>
+				<MenuItem Command="local:MainWindow.ExitCmd"/>
+			</MenuItem>
+			<MenuItem Header="_Edit" >
+				<MenuItem Command="local:MainWindow.OptionsCmd"/>
+			</MenuItem>
+		</Menu>
+
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="3*"/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+
+			<local:ConnectFourGame x:Name="c4" Grid.Column="1"/>
+			<local:StatusBar x:Name="status" Grid.Column="3"/>
+
+		</Grid>
+	</DockPanel>
 </Window>

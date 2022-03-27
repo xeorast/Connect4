@@ -29,6 +29,11 @@ public partial class ConnectFourGame : UserControl
 		InitializeGame();
 	}
 
+	public void Restart()
+	{
+		InitializeGame();
+	}
+
 	[MemberNotNull( nameof( Game ) )]
 	[MemberNotNull( nameof( Tokens ) )]
 	[MemberNotNull( nameof( ColumnButtons ) )]
@@ -194,7 +199,7 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="e"></param>
 	private void EndScreen_Click( object sender, RoutedEventArgs e )
 	{
-		InitializeGame();
+		Restart();
 	}
 
 	/// <summary>

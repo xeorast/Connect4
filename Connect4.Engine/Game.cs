@@ -76,6 +76,15 @@ public class Game
 	/// called when current player is switched
 	/// </summary>
 	public event PlayerSwitchedEventHandler? PlayerSwitched;
+	/// <summary>
+	/// handler for <see cref="TurnCompleted"/> event
+	/// </summary>
+	/// <param name="sender">game instance calling this event</param>
+	public delegate void TurnCompletedEventHandler( Game sender );
+	/// <summary>
+	/// called when player move is fully handled
+	/// </summary>
+	public event TurnCompletedEventHandler? TurnCompleted;
 
 	/// <summary>
 	/// inserts token into given column
@@ -111,6 +120,7 @@ public class Game
 			UpdatePlayer();
 		}
 
+		TurnCompleted?.Invoke( this );
 		return row;
 	}
 

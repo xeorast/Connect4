@@ -95,6 +95,7 @@ public partial class MainWindow : Window
 
 	private void Options_Command_Executed( object sender, System.Windows.Input.ExecutedRoutedEventArgs e )
 	{
-		// todo: summon options window
+		OptionsWindow options = new() { Owner = this, ShowInTaskbar = false };
+		_ = options.ShowDialog();
 	}
 }

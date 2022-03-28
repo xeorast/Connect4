@@ -1,0 +1,85 @@
+﻿<Window x:Class="Connect4.OptionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Connect4"
+        xmlns:localConverters="clr-namespace:Connect4.Converters"
+        mc:Ignorable="d"
+		d:DataContext="{d:DesignInstance Type=local:OptionsWindow, IsDesignTimeCreatable=True}"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Options" 
+		Height="280" Width="300" ResizeMode="NoResize"
+		WindowStyle="ToolWindow"
+		Closing="Window_Closing">
+
+	<Window.Resources>
+		<localConverters:EnumBooleanConverter x:Key="EnumBooleanConverter"/>
+	</Window.Resources>
+
+	<Window.CommandBindings>
+		<CommandBinding Command="Save" Executed="Save_Command_Executed"/>
+		<CommandBinding Command="Close" Executed="Close_Command_Executed"/>
+	</Window.CommandBindings>
+
+	<StackPanel>
+		<StackPanel Margin="20,20,20,10">
+			<Label>Game mode</Label>
+			<RadioButton GroupName="GameMode"
+						 IsChecked="{Binding Path=GameMode, 
+									Converter={StaticResource EnumBooleanConverter}, 
+									ConverterParameter={x:Static local:GameMode.PvP}}"  
+						 Margin="10,0,0,0">
+				Player v Player
+			</RadioButton>
+			<RadioButton GroupName="GameMode"
+						 IsChecked="{Binding Path=GameMode, 
+									Converter={StaticResource EnumBooleanConverter}, 
+									ConverterParameter={x:Static local:GameMode.PvC}}"  
+						 Margin="10,0,0,0">
+				Player v Computer
+			</RadioButton>
+			<RadioButton GroupName="GameMode"
+						 IsChecked="{Binding Path=GameMode, 
+									Converter={StaticResource EnumBooleanConverter}, 
+									ConverterParameter={x:Static local:GameMode.CvC}}"  
+						 Margin="10,0,0,0">
+				Computer v Computer (Demo)
+			</RadioButton>
+		</StackPanel>
+
+		<BulletDecorator Margin="20,10,20,0">
+			<BulletDecorator.Bullet>
+				<Label>Difficulty</Label>
+			</BulletDecorator.Bullet>
+			<Slider Minimum="1" Maximum="5" 
+					AutoToolTipPlacement="BottomRight"
+					Value="{Binding Path=Difficulty}"
+					d:Visibility="Visible" IsEnabled="{Binding BotPropertiesVisibility}"
+					VerticalAlignment="Center"/>
+		</BulletDecorator>
+
+		<BulletDecorator Margin="20,0,20,10">
+			<BulletDecorator.Bullet>
+				<Label>Bot move interval</Label>
+			</BulletDecorator.Bullet>
+			<Slider Minimum="200" Maximum="5000"
+					AutoToolTipPlacement="BottomRight" 
+					Value="{Binding Path=MinBotMoveTime}"
+					d:Visibility="Visible" IsEnabled="{Binding BotPropertiesVisibility}"
+					VerticalAlignment="Center" LargeChange="100"/>
+		</BulletDecorator>
+
+		<UniformGrid Margin="20,10,20,0" Rows="1">
+			<Button Command="Save" IsDefault="True" Margin="0,0,5,0">Save</Button>
+			<Button Command="Close" IsCancel="True" Margin="5,0,0,0">Cancel</Button>
+		</UniformGrid>
+		
+		<Label Margin="20,10,20,0" 
+			   FontStyle="Italic" FontSize="10" 
+			   d:Visibility="Visible" Visibility="{Binding SavingNoteVisibility}">
+			Note: changes will only apply after this game ends
+		</Label>
+
+	</StackPanel>
+</Window>

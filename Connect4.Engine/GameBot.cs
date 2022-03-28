@@ -3,6 +3,9 @@
 public class GameBot
 {
 	public Hue BotHue { get; }
+	/// <summary>
+	/// maximal depth of foreseeing, in full turns
+	/// </summary>
 	public int MaxLevel { get; }
 	public int NumberPlayers { get; private set; }
 
@@ -13,19 +16,25 @@ public class GameBot
 		NumberPlayers = numberPlayers;
 	}
 
-	//static readonly Random rng = new();
+	static readonly Random rng = new();
+
+	/// <summary>
+	/// initializes recursive cost calculating and chooses lowest cost move
+	/// </summary>
+	/// <param name="well">well for which recommendation is made</param>
+	/// <returns>recommended column</returns>
 	public int GetRecommendation( Well well )
 	{
 		return Enumerable
 			.Range( 0, well.Width )                                     // fot each column
-			.Where( col => !well.IsColumnFull( col ) )              // which is not full
+			.Where( col => !well.IsColumnFull( col ) )				// which is not full
 			.AsParallel()
 			.WithDegreeOfParallelism( well.Width )                      // parallelise every column
 			.Select( col =>
 				(column: col,
 				cost: CalculateCost( well, col, BotHue, MaxLevel )) )   // calculate cost of choosing it
-			.OrderBy( option => option.cost )       // choose cheapest
-			//.ThenBy( option => rng.Next() )							// in case of two equal take random
+			.OrderBy( option => option.cost )		// choose cheapest
+			.ThenBy( option => rng.Next() )			// in case of two equal take random
 			.First()
 			.column;                                                    // return choosen column
 	}
@@ -56,19 +65,6 @@ public class GameBot
 		var copy = well.Clone();
 		_ = copy.InsertToken( col, startHue );
 
-		//if ( levesLeft > 4 )
-		//{
-		//	_ = Parallel.For( 0, well.Width, i =>
-		//	   {
-		//		   if ( !copy.IsColumnFull( i ) )
-		//		   {
-		//			   cost += CalculateCost( copy, i, nextHue, nextLevels ) / 2;
-		//		   }
-		//	   } );
-		//}
-		//else
-		//{
-
 		// calculate cost of this shot
 		for ( int i = 0; i < well.Width; i++ )
 		{
@@ -77,7 +73,6 @@ public class GameBot
 				cost += CalculateCost( copy, i, nextHue, nextLevels ) / 2;
 			}
 		}
-		//}
 
 		return cost;
 	}
@@ -86,4 +81,5 @@ public class GameBot
 	{
 		return well.IsFieldWinning( col, well.GetFreeRow( col ), hue ) ? 1.0f : 0.0f;
 	}
+
 }

@@ -40,16 +40,11 @@ public class GameBot
 	}
 	private float CalculateCost( Well well, int col, Hue startHue, int levesLeft )
 	{
-		// for propability calculate how many columns are available
-		var validCols = Enumerable.Range( 0, well.Width )
-			.Where( x => !well.IsColumnFull( x ) )
-			.Count();
-
 		// calculate if winnings are for bot or oponnnent
 		float sign = startHue == BotHue ? -1.0f : 1.0f;
 
 		// calculate cost of this shot at this exact level
-		float cost = sign * CalculateCost( well, col, startHue ) / validCols;
+		float cost = sign * CalculateCost( well, col, startHue );
 
 		// if got back to bot, decrease level
 		Hue nextHue = startHue.Next( NumberPlayers );
@@ -65,12 +60,17 @@ public class GameBot
 		var copy = well.Clone();
 		_ = copy.InsertToken( col, startHue );
 
+		// for propability calculate how many columns are available
+		var validCols = Enumerable.Range( 0, copy.Width )
+			.Where( x => !copy.IsColumnFull( x ) )
+			.Count();
+
 		// calculate cost of this shot
 		for ( int i = 0; i < well.Width; i++ )
 		{
 			if ( !copy.IsColumnFull( i ) )
 			{
-				cost += CalculateCost( copy, i, nextHue, nextLevels ) / 2;
+				cost += CalculateCost( copy, i, nextHue, nextLevels ) / 2 / validCols;
 			}
 		}
 

@@ -15,11 +15,20 @@
 					 Width="350" Height="300"
                      Columns="7" Rows="6">
 
+				<local:Token Style="{StaticResource HiddenToken}"/>
 				<local:Token Style="{StaticResource PinkToken}"/>
 				<local:Token Style="{StaticResource RedToken}"/>
 				<local:Token Style="{StaticResource YellowToken}"/>
-				<local:Token Style="{StaticResource HiddenToken}"/>
-				<local:Token FrontColor="Transparent" BackColor="Transparent"/>
+				<local:Token Style="{StaticResource PinkTokenInversed}"/>
+				<local:Token Style="{StaticResource RedTokenInversed}"/>
+				<local:Token Style="{StaticResource YellowTokenInversed}"/>
+				<local:Token Style="{StaticResource PinkTokenDark}"/>
+				<local:Token Style="{StaticResource RedTokenDark}"/>
+				<local:Token Style="{StaticResource YellowTokenDark}"/>
+				<local:Token Style="{StaticResource PinkTokenDarkAlt}"/>
+				<local:Token Style="{StaticResource RedTokenDarkAlt}"/>
+				<local:Token Style="{StaticResource YellowTokenDarkAlt}"/>
+				<local:Token FrontColor="#FF672067" BackColor="#FFA52FA5"/>
 			</UniformGrid>
 
 			<UniformGrid x:Name="hitTestGrid"

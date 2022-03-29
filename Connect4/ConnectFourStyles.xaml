@@ -98,6 +98,36 @@
 		<Setter Property="BackColor" Value="#FFB39C30"/>
 	</Style>
 
+	<Style TargetType="{x:Type local:Token}" x:Key="PinkTokenDark">
+		<Setter Property="FrontColor" Value="#FF672067"/>
+		<Setter Property="BackColor" Value="#FFA52FA5"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="RedTokenDark">
+		<Setter Property="FrontColor" Value="#FF611C1C"/>
+		<Setter Property="BackColor" Value="#FFA52F2F"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="YellowTokenDark">
+		<Setter Property="FrontColor" Value="#FF6D5F1D"/>
+		<Setter Property="BackColor" Value="#FFB39C30"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="PinkTokenDarkAlt">
+		<Setter Property="FrontColor" Value="#FFA52FA5"/>
+		<Setter Property="BackColor" Value="#FF672067"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="RedTokenDarkAlt">
+		<Setter Property="FrontColor" Value="#FFA52F2F"/>
+		<Setter Property="BackColor" Value="#FF611C1C"/>
+	</Style>
+
+	<Style TargetType="{x:Type local:Token}" x:Key="YellowTokenDarkAlt">
+		<Setter Property="FrontColor" Value="#FFB39C30"/>
+		<Setter Property="BackColor" Value="#FF6D5F1D"/>
+	</Style>
+
 	<LinearGradientBrush x:Key="DarkLigntBackground" EndPoint="1,0" StartPoint="0,0.5">
 		<GradientStop Color="#15000000" Offset="0"/>
 		<GradientStop Color="#15FFFFFF" Offset="1"/>

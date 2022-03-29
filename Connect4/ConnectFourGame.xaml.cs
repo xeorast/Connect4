@@ -28,7 +28,7 @@ public partial class ConnectFourGame : UserControl
 	System.Timers.Timer GameTimer { get; set; }
 	bool HasTurnEnded { get; set; }
 	public int MinBotMoveTime { get; set; }
-
+	(Token token, Hue hue)? LastToken { get; set; }
 
 	Dictionary<Hue, GameBot> Bots { get; set; }
 	Dictionary<Hue, PlayerType> Players { get; set; } = new();
@@ -74,6 +74,12 @@ public partial class ConnectFourGame : UserControl
 		InitializeGrid();
 		InitializeColumnButtons();
 		InitializeTimer();
+
+		bool disable = Players[Game.CurrentPlayer] is PlayerType.Computer;
+		foreach ( var button in ColumnButtons )
+		{
+			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );
+		}
 	}
 
 	[MemberNotNull( nameof( Bots ) )]
@@ -168,7 +174,14 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="hue">color</param>
 	void ShowToken( int col, int row, Hue hue )
 	{
-		var key = GetTokenClass( hue );
+		if ( LastToken is not null )
+		{
+			var lastKey = GetTokenClass( LastToken.Value.hue );
+			LastToken.Value.token.Style = Application.Current.Resources[lastKey] as Style;
+		}
+
+		var key = GetNewTokenClass( hue );
+		LastToken = (Tokens[col, row], hue);
 
 		Tokens[col, row].Style = Application.Current.Resources[key] as Style;
 	}
@@ -324,6 +337,21 @@ public partial class ConnectFourGame : UserControl
 			Hue.Yellow => "YellowToken",
 			Hue.Red => "RedToken",
 			_ => "PinkToken",
+		};
+	}
+
+	/// <summary>
+	/// gets name of token style for newly inserted token
+	/// </summary>
+	/// <param name="hue">color</param>
+	/// <returns></returns>
+	public static string GetNewTokenClass( Hue hue )
+	{
+		return hue switch
+		{
+			Hue.Yellow => "YellowTokenDark",
+			Hue.Red => "RedTokenDark",
+			_ => "PinkTokenDark",
 		};
 	}
 

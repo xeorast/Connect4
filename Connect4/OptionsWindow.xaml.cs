@@ -65,13 +65,18 @@ public partial class OptionsWindow : Window
 		DependencyProperty.Register( "BotPropertiesVisibility", typeof( bool ), typeof( OptionsWindow ), new PropertyMetadata( true ) );
 
 
+	void UpdateCopy()
+	{
+		SavedGameMode = GameMode;
+		SavedDifficulty = Difficulty;
+		SavedMinBotMoveTime = MinBotMoveTime;
+	}
+
 	public OptionsWindow()
 	{
 		InitializeComponent();
 
-		SavedGameMode = GameMode;
-		SavedDifficulty = Difficulty;
-		SavedMinBotMoveTime = MinBotMoveTime;
+		UpdateCopy();
 
 		UpdateVisibilities();
 	}
@@ -80,8 +85,7 @@ public partial class OptionsWindow : Window
 	{
 		UserSettings.Default.Save();
 
-		SavedGameMode = GameMode;
-		SavedDifficulty = Difficulty;
+		UpdateCopy();
 
 		Close();
 	}

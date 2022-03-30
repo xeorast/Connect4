@@ -6,10 +6,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\C4Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Page Remove="Samples\TokenSampleData.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\C4Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

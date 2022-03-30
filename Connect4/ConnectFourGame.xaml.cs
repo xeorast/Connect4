@@ -26,7 +26,7 @@ public partial class ConnectFourGame : UserControl
 	/// game timer for sort of main loop
 	/// </summary>
 	System.Timers.Timer GameTimer { get; set; }
-	bool HasTurnEnded { get; set; }
+	volatile bool hasTurnEnded;
 	public int MinBotMoveTime { get; set; }
 	(Token token, Hue hue)? LastToken { get; set; }
 
@@ -151,7 +151,7 @@ public partial class ConnectFourGame : UserControl
 	{
 		GameTimer = new( timerInterval );
 		GameTimer.Elapsed += Timer_Elapsed;
-		HasTurnEnded = true;
+		hasTurnEnded = true;
 		GameTimer.Start();
 	}
 
@@ -237,13 +237,20 @@ public partial class ConnectFourGame : UserControl
 	async Task MoveBot()
 	{
 		var delay = Task.Delay( MinBotMoveTime );
+		//if ( Game.CurrentPlayer != Hue.Yellow )
+		//{
+		//	throw new Exception( "error" );
+		//}
 		var col = Bots[Game.CurrentPlayer].GetRecommendation( Game.CloneWell() );
 		await delay;
-
+		//if ( Game.CurrentPlayer != Hue.Yellow )
+		//{
+		//	throw new Exception( "worse error" );
+		//}
 		Dispatcher.Invoke( () => { _ = Game.Move( col ); } );
 	}
 
-
+	readonly SemaphoreSlim semaphore = new( 1, 1 );
 	/// <summary>
 	/// invoked every <see cref="timerInterval"/> and moves bot if its needed
 	/// </summary>
@@ -251,14 +258,19 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="e"></param>
 	private async void Timer_Elapsed( object? sender, System.Timers.ElapsedEventArgs e )
 	{
-		if ( HasTurnEnded && !Game.HasEnded )
+		if ( !semaphore.Wait( (int)timerInterval ) )
 		{
-			HasTurnEnded=false;
+			return;
+		}
+		if ( hasTurnEnded && !Game.HasEnded )
+		{
+			hasTurnEnded = false;
 			if ( Players[Game.CurrentPlayer] is PlayerType.Computer )
 			{
 				await MoveBot();
 			}
 		}
+		_ = semaphore.Release();
 	}
 
 	/// <summary>
@@ -268,10 +280,12 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="e"></param>
 	private void Column_Click( object sender, RoutedEventArgs e )
 	{
-		var btn = (Button)sender;
-		var col = (int)btn.Tag;
-
-		_ = Game.Move( col );
+		if ( Players[Game.CurrentPlayer] is PlayerType.Player )
+		{
+			var btn = (Button)sender;
+			var col = (int)btn.Tag;
+			_ = Game.Move( col );
+		}
 
 	}
 
@@ -311,7 +325,7 @@ public partial class ConnectFourGame : UserControl
 		{
 			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );
 		}
-		HasTurnEnded = true;
+		hasTurnEnded = true;
 	}
 
 

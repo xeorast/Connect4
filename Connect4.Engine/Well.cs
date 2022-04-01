@@ -31,6 +31,20 @@ public class Well
 	}
 
 	/// <summary>
+	/// creates game with given parameters
+	/// </summary>
+	/// <param name="well">2d array to base well on</param>
+	/// <param name="toConnect">numbers of tokens required for win</param>
+	public Well( Hue[,] well, int toConnect = 4 )
+	{
+		Width = well.GetLength( 0 );
+		Height = well.GetLength( 1 );
+		ToConnect = toConnect;
+
+		WellObj = well;
+	}
+
+	/// <summary>
 	/// inserts token into given column
 	/// </summary>
 	/// <param name="col">column to insert token to</param>

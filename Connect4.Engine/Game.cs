@@ -1,9 +1,57 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Connect4.Engine;
 
-public class Game
+/// <summary>
+/// interface for json serialization
+/// </summary>
+public interface IGame
 {
+	IWell WellClone { get; }
+	int NumberPlayers { get; }
+	Hue? Winner { get; }
+	Hue CurrentPlayer { get; }
+}
+
+/// <summary>
+/// extension for json serialization
+/// </summary>
+public static class GameExtensions
+{
+	public static string SerializeToJson( this IGame s, JsonSerializerOptions? options = null ) =>
+		JsonSerializer.Serialize( s, options );
+}
+
+public class Game : IGame
+{
+	/// <summary>
+	/// constructor for json deserialization
+	/// </summary>
+	/// <param name="numberPlayers"></param>
+	/// <param name="winner"></param>
+	/// <param name="currentPlayer"></param>
+	/// <param name="wellClone"></param>
+	[JsonConstructor]
+	public Game( int numberPlayers, Hue? winner, Hue currentPlayer, IWell wellClone ) =>
+		(Well, NumberPlayers, Winner, CurrentPlayer) = ((Well)wellClone, numberPlayers, winner, currentPlayer);
+
+	/// <summary>
+	/// helper for json deserialization
+	/// </summary>
+	/// <param name="json"></param>
+	/// <param name="options"></param>
+	/// <returns></returns>
+	public static Game? DeserializeFromJson( string json, JsonSerializerOptions? options = null ) =>
+		JsonSerializer.Deserialize<Game>( json, options );
+
+	/// <summary>
+	/// well copy for json serialization
+	/// </summary>
+	[JsonConverter( typeof( JsonConverters.IWellJsonConverter ) )]
+	public IWell WellClone => CloneWell();
+
 	Well Well { get; }
 	public int Width => Well.Width;
 	public int Height => Well.Height;

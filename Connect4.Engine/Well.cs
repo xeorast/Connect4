@@ -1,18 +1,59 @@
-﻿namespace Connect4.Engine;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
-public class Well
+namespace Connect4.Engine;
+
+/// <summary>
+/// interface for json serialization
+/// </summary>
+public interface IWell
 {
+	int ToConnect { get; }
+	[JsonConverter( typeof( JsonConverters.Array2DJsonConverter<Hue> ) )]
+	Hue[,] WellObj { get; }
+}
+
+/// <summary>
+/// extension for json serialization
+/// </summary>
+public static class WellExtensions
+{
+	public static string SerializeToJson( this IWell s, JsonSerializerOptions? options = null )=>
+		JsonSerializer.Serialize( s, options );	
+}
+
+public class Well : IWell
+{
+	/// <summary>
+	/// constructor for json deserialization
+	/// </summary>
+	/// <param name="toConnect"></param>
+	/// <param name="wellObj"></param>
+	[JsonConstructor]
+	public Well( int toConnect, Hue[,] wellObj ) =>
+		(Height, Width, ToConnect, WellObj) = (wellObj.GetLength( 1 ), wellObj.GetLength( 0 ), toConnect, wellObj);
+
+	/// <summary>
+	/// helper for json deserialization
+	/// </summary>
+	/// <param name="json"></param>
+	/// <param name="options"></param>
+	/// <returns></returns>
+	public static Well? DeserializeFromJson( string json, JsonSerializerOptions? options = null ) =>
+		JsonSerializer.Deserialize<Well>( json, options );
+
 	public int Height { get; }
 	public int Width { get; }
 	private int TopRow => Height - 1;
 	private int RightEnd => Width - 1;
-	private int ToConnect { get; }
+	public int ToConnect { get; }
 	/// <summary>
 	/// 2D array of colors storing well fields states
 	/// </summary>
 	/// <remarks>
 	/// ordered as [column, row]
 	/// </remarks>
+	[JsonConverter( typeof( JsonConverters.Array2DJsonConverter<Hue> ) )]
 	public Hue[,] WellObj { get; set; }// col, row
 
 	/// <summary>

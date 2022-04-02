@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Connect4.Api.JsonConverters;
+namespace Connect4.Engine.JsonConverters;
 
 public class Array2DJsonConverter<T> : JsonConverter<T[,]> where T : struct, Enum
 {

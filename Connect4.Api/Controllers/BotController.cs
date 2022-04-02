@@ -1,8 +1,6 @@
-﻿using Connect4.Api.JsonConverters;
+﻿using Connect4.Domain.Dtos;
 using Connect4.Engine;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Connect4.Api.Controllers;
 
@@ -24,22 +22,4 @@ public class BotController : ControllerBase
 
 		return bot.GetRecommendation( well );
 	}
-
-	public record WellDto(
-		int ToConnect,
-		Hue[,] Well )
-	{
-		[JsonConverter( typeof( Array2DJsonConverter<Hue> ) )]
-		public Hue[,] Well { get; init; } = Well;
-	};
-
-	public record BotRequestDto(
-		[Required]
-			WellDto Well,
-		[Required]
-		[Range( 1, 5 )]
-			int Difficulty,
-		[Required]
-		[Range(1, int.MaxValue )]
-			Hue CurrentPlayer );
 }

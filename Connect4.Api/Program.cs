@@ -1,3 +1,4 @@
+using Connect4.Api.Services;
 using Connect4.Engine;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -15,6 +16,8 @@ builder.Services.AddSwaggerGen( c =>
 	OpenApiSchema arr = new() { Title = "Hue array", Type = "array", Items = num };
 	c.MapType<Hue[,]>( () => new OpenApiSchema() { Title = "2D Hue array", Type = "array", Items = arr } );
 } );
+
+builder.Services.AddScoped<IMultiplayerService, MultiplayerService>();
 
 var app = builder.Build();
 

@@ -1,6 +1,8 @@
 ﻿using Connect4.Api.Exceptions;
+using Connect4.Data;
 using Connect4.Domain.Models;
 using Connect4.Engine;
+using Microsoft.EntityFrameworkCore;
 
 namespace Connect4.Api.Services;
 
@@ -13,13 +15,19 @@ public interface IMultiplayerService
 
 public class MultiplayerService : IMultiplayerService
 {
-	private static readonly List<GameModel> _games = new();
+	private readonly AppDbContext _dbContext;
+
+	public MultiplayerService( AppDbContext dbContext )
+	{
+		_dbContext = dbContext;
+	}
 
 	async Task<Guid> IMultiplayerService.CreateGameAsync()
 	{
-		await Task.CompletedTask;
 		GameModel game = new( Guid.NewGuid(), new Game() );
-		_games.Add( game );
+
+		_ = _dbContext.Add( game );
+		_ = await _dbContext.SaveChangesAsync();
 
 		return game.Uuid;
 	}
@@ -36,16 +44,17 @@ public class MultiplayerService : IMultiplayerService
 
 		var game = gameModel.GetGameFromState();
 		_ = game.Move( column );
+
 		gameModel.UpdateState( game );
 
+		_ = await _dbContext.SaveChangesAsync();
 	}
 
 	private async Task<GameModel?> GetGameAsync( Guid uuid )
 	{
-		await Task.CompletedTask;
-		var game = _games
+		var game = await _dbContext.Games
 			.Where( x => x.Uuid == uuid )
-			.FirstOrDefault();
+			.FirstOrDefaultAsync();
 
 		return game;
 	}

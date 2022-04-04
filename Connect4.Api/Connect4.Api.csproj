@@ -4,15 +4,24 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a0d4c46b-8942-4bd1-b61f-c0d1d1e33f25</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
+    <PackageReference Include="microsoft.entityframeworkcore.sqlserver" Version="6.0.3" />
+    <PackageReference Include="microsoft.entityframeworkcore.tools" Version="6.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Connect4.Data\Connect4.Data.csproj" />
     <ProjectReference Include="..\Connect4.Domain\Connect4.Domain.csproj" />
     <ProjectReference Include="..\Connect4.Engine\Connect4.Engine.csproj" />
+    <ProjectReference Include="..\Connect4.Migrations.MsSql\Connect4.Migrations.MsSql.csproj" />
   </ItemGroup>
 
 </Project>

@@ -97,7 +97,7 @@ public class Well : IWell
 		// if top space is occupied, the move is invalid
 		if ( IsColumnFull( col ) )
 		{
-			throw new InvalidOperationException( "collumn is ful" );
+			throw new InvalidOperationException( "Specified column is ful" );
 		}
 
 		// fill lowest free space

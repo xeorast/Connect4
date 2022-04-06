@@ -19,17 +19,11 @@ public class MultiplayerController : ControllerBase
 	[HttpGet( "{uuid}" )]
 	public async Task<ActionResult<GameDto>> GetBoard( Guid uuid )
 	{
-		var model = await _multiplayerService.GetBoardAsync( uuid );
-		if ( model is null )
+		var gameDto = await _multiplayerService.GetBoardAsync( uuid );
+		if ( gameDto is null )
 		{
 			return NotFound();
 		}
-
-		var game = model.GetGameFromState();
-		var well = game.CloneWell();
-
-		WellDto wellDto = new( well.ToConnect, well.WellObj );
-		GameDto gameDto = new( game.NumberPlayers, game.Winner, game.CurrentPlayer, wellDto );
 
 		return gameDto;
 	}
@@ -46,12 +40,20 @@ public class MultiplayerController : ControllerBase
 		try
 		{
 			await _multiplayerService.MoveAsync( uuid, column );
-			return Ok();
 		}
 		catch ( NotFoundException e )
 		{
 			return NotFound( e.Message );
 		}
+		catch ( InvalidOperationException e )
+		{
+			return BadRequest( e.Message );
+		}
+		catch ( ArgumentOutOfRangeException e )
+		{
+			return BadRequest( e.Message );
+		}
+		return Ok();
 	}
 
 }

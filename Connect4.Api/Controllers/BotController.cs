@@ -15,11 +15,13 @@ public class BotController : ControllerBase
 
 		Well well = new( req.Well.Well, req.Well.ToConnect );
 
-		if ( well.IsWellFull() )
+		try
 		{
-			return BadRequest( "cannot generate suggestion for full well" );
+			return bot.GetRecommendation( well );
 		}
-
-		return bot.GetRecommendation( well );
+		catch ( InvalidOperationException e )
+		{
+			return BadRequest( e.Message );
+		}
 	}
 }

@@ -23,8 +23,14 @@ public class GameBot
 	/// </summary>
 	/// <param name="well">well for which recommendation is made</param>
 	/// <returns>recommended column</returns>
+	/// <exception cref="InvalidOperationException">Well is full</exception>
 	public int GetRecommendation( Well well )
 	{
+		if ( well.IsWellFull() )
+		{
+			throw new InvalidOperationException( "Cannot generate suggestion for full well" );
+		}
+
 		return Enumerable
 			.Range( 0, well.Width )                                     // fot each column
 			.Where( col => !well.IsColumnFull( col ) )				// which is not full

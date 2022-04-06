@@ -1,5 +1,6 @@
 ﻿using Connect4.Api.Exceptions;
 using Connect4.Data;
+using Connect4.Domain.Dtos;
 using Connect4.Domain.Models;
 using Connect4.Engine;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,17 @@ namespace Connect4.Api.Services;
 public interface IMultiplayerService
 {
 	Task<Guid> CreateGameAsync();
+	/// <summary>
+	/// performs move on game with given id
+	/// </summary>
+	/// <param name="uuid">uuid of the game</param>
+	/// <param name="column">column to insert token to</param>
+	/// <returns></returns>
+	/// <exception cref="NotFoundException">Game not found</exception>
+	/// <exception cref="ArgumentOutOfRangeException">Column out of range</exception>
+	/// <exception cref="InvalidOperationException">Game ended or column is full</exception>
 	Task MoveAsync( Guid uuid, int column );
-	Task<GameModel?> GetBoardAsync( Guid uuid );
+	Task<GameDto?> GetBoardAsync( Guid uuid );
 }
 
 public class MultiplayerService : IMultiplayerService
@@ -32,11 +42,22 @@ public class MultiplayerService : IMultiplayerService
 		return game.Uuid;
 	}
 
-	async Task<GameModel?> IMultiplayerService.GetBoardAsync( Guid uuid )
+	async Task<GameDto?> IMultiplayerService.GetBoardAsync( Guid uuid )
 	{
-		return await GetGameAsync( uuid );
+		var model = await GetGameAsync( uuid );
+		if ( model is null )
+		{
+			return null;
+		}
+
+		var game = model.GetGameFromState();
+		var well = game.CloneWell();
+
+		WellDto wellDto = new( well.ToConnect, well.WellObj );
+		return new GameDto( game.NumberPlayers, game.Winner, game.CurrentPlayer, wellDto );
 	}
 
+	/// <inheritdoc/>
 	async Task IMultiplayerService.MoveAsync( Guid uuid, int column )
 	{
 		var gameModel = await GetGameAsync( uuid )

@@ -139,9 +139,28 @@ public class Game : IGame
 	/// </summary>
 	/// <param name="col">column to insert token to</param>
 	/// <returns>row where token got inserted</returns>
+	/// <exception cref="ArgumentOutOfRangeException">Column out of range</exception>
+	/// <exception cref="InvalidOperationException">Game ended or column is full</exception>
 	public int Move( int col )
 	{
-		int row = Well.InsertToken( col, CurrentPlayer );
+		if ( HasEnded )
+		{
+			throw new InvalidOperationException( "Game has ended" );
+		}
+		if ( col < 0 || col > Width - 1 )
+		{
+			throw new ArgumentOutOfRangeException( nameof( col ), "Specified column is out of range" );
+		}
+
+		int row;
+		try
+		{
+			row = Well.InsertToken( col, CurrentPlayer );
+		}
+		catch ( InvalidOperationException )
+		{
+			throw;
+		}
 
 		PlayerMoved?.Invoke( this, col, row, CurrentPlayer );
 

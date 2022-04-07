@@ -18,7 +18,7 @@ builder.Services.AddScoped<IMultiplayerService, MultiplayerService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( c =>
 {

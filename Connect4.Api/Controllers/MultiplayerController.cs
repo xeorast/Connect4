@@ -39,7 +39,7 @@ public class MultiplayerController : ControllerBase
 	{
 		try
 		{
-			await _multiplayerService.MoveAsync( uuid, column );
+			_ = await _multiplayerService.MoveAsync( uuid, column );
 		}
 		catch ( NotFoundException e )
 		{

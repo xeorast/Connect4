@@ -25,7 +25,8 @@ public class GameModel
 
 	public Game GetGameFromState()
 	{
-		return Game.DeserializeFromJson( State ) ?? throw new NullReferenceException( "game was null" );
+		return Game.DeserializeFromJson( State )
+			?? throw new NullReferenceException( "game was null" );
 	}
 
 	public void UpdateState( Game game )

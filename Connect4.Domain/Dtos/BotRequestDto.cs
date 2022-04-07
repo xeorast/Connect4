@@ -5,10 +5,10 @@ namespace Connect4.Domain.Dtos;
 
 public record BotRequestDto(
 	[Required]
-			WellDto Well,
+		WellDto Well,
 	[Required]
-		[Range( 1, 5 )]
-			int Difficulty,
+	[Range( 1, 5 )]
+		int Difficulty,
 	[Required]
-		[Range(1, int.MaxValue )]
-			Hue CurrentPlayer );
+	[Range(1, int.MaxValue )]
+		Hue CurrentPlayer );

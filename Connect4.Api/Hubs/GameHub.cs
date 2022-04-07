@@ -1,4 +1,5 @@
-﻿using Connect4.Domain.Dtos.GameEvents;
+﻿using Connect4.Api.Exceptions;
+using Connect4.Domain.Dtos.GameEvents;
 using Connect4.Engine;
 using Microsoft.AspNetCore.SignalR;
 
@@ -59,7 +60,22 @@ public class GameHub : Hub<IGameClient>
 	public async Task Move( int column )
 	{
 		var uuid = GetGameUuid();
-		_ = await _multiplayerService.MoveAsync( uuid, column, GetEvents( uuid ) );
+		try
+		{
+			_ = await _multiplayerService.MoveAsync( uuid, column, GetEvents( uuid ) );
+		}
+		catch ( NotFoundException e )
+		{
+			throw new HubException( e.Message );
+		}
+		catch ( InvalidOperationException e )
+		{
+			throw new HubException( e.Message );
+		}
+		catch ( ArgumentOutOfRangeException e )
+		{
+			throw new HubException( e.Message );
+		}
 
 	}
 

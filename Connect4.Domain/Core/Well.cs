@@ -1,47 +1,14 @@
-﻿using Connect4.Domain.JsonConverters;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿namespace Connect4.Domain.Core;
 
-namespace Connect4.Domain.Core;
-
-/// <summary>
-/// interface for json serialization
-/// </summary>
-public interface IWell
-{
-	int ToConnect { get; }
-	[JsonConverter( typeof( Array2DJsonConverter<Hue> ) )]
-	Hue[,] WellObj { get; }
-}
-
-/// <summary>
-/// extension for json serialization
-/// </summary>
-public static class WellExtensions
-{
-	public static string SerializeToJson( this IWell s, JsonSerializerOptions? options = null ) =>
-		JsonSerializer.Serialize( s, options );
-}
-
-public class Well : IWell
+public class Well
 {
 	/// <summary>
-	/// constructor for json deserialization
+	/// 
 	/// </summary>
 	/// <param name="toConnect"></param>
 	/// <param name="wellObj"></param>
-	[JsonConstructor]
 	public Well( int toConnect, Hue[,] wellObj ) =>
 		(Height, Width, ToConnect, WellObj) = (wellObj.GetLength( 1 ), wellObj.GetLength( 0 ), toConnect, wellObj);
-
-	/// <summary>
-	/// helper for json deserialization
-	/// </summary>
-	/// <param name="json"></param>
-	/// <param name="options"></param>
-	/// <returns></returns>
-	public static Well? DeserializeFromJson( string json, JsonSerializerOptions? options = null ) =>
-		JsonSerializer.Deserialize<Well>( json, options );
 
 	public int Height { get; }
 	public int Width { get; }
@@ -54,7 +21,6 @@ public class Well : IWell
 	/// <remarks>
 	/// ordered as [column, row]
 	/// </remarks>
-	[JsonConverter( typeof( Array2DJsonConverter<Hue> ) )]
 	public Hue[,] WellObj { get; set; }// col, row
 
 	/// <summary>

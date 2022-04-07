@@ -5,6 +5,12 @@ namespace Connect4.Domain.JsonConverters;
 
 public class Array2DJsonConverter<T> : JsonConverter<T[,]> where T : struct, Enum
 {
+	public static JsonSerializerOptions OptionsWithConverter => optionsWithConverter;
+	private readonly static JsonSerializerOptions optionsWithConverter = new()
+	{
+		Converters = { new Array2DJsonConverter<T>() }
+	};
+
 	public static bool TryReadToken( ref Utf8JsonReader reader, JsonTokenType tokenType )
 	{
 		if ( reader.TokenType != tokenType )

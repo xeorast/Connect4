@@ -1,6 +1,6 @@
 ﻿using Connect4.Api.Exceptions;
+using Connect4.Domain.Core;
 using Connect4.Domain.Dtos.GameEvents;
-using Connect4.Engine;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Connect4.Api.Hubs;
@@ -88,17 +88,17 @@ public class GameHub : Hub<IGameClient>
 		var clients = GetGameGroup( uuid );
 
 		return new(
-			PlayerMoved: ( Game _, int col, int row, Hue hue ) =>
-				clients.PlayerMoved( new( col, row, hue ) ),
+			PlayerMoved: ( Game _, PlayerMovedDto d ) =>
+				clients.PlayerMoved( d ),
 
-			GameEnded: ( Game _, Hue winner ) =>
-				clients.GameEnded( new( winner ) ),
+			GameEnded: ( Game _, GameEndedDto d ) =>
+				clients.GameEnded( d ),
 
-			ColumnFilled: ( Game _, int col ) =>
-				clients.ColumnFilled( new( col ) ),
+			ColumnFilled: ( Game _, ColumnFilledDto d ) =>
+				clients.ColumnFilled( d ),
 
-			PlayerSwitched: ( Game _, Hue oldPlayer, Hue newPlayer ) =>
-				clients.PlayerSwitched( new( oldPlayer, newPlayer ) ),
+			PlayerSwitched: ( Game _, PlayerSwitchedDto d ) =>
+				clients.PlayerSwitched( d ),
 
 			TurnCompleted: ( Game sender ) =>
 				clients.TurnCompleted() );

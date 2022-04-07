@@ -1,4 +1,5 @@
-﻿using Connect4.Engine;
+﻿using Connect4.Domain.Core;
+using Connect4.Domain.Dtos.GameEvents;
 using System.Windows;
 using System.Windows.Input;
 
@@ -57,18 +58,18 @@ public partial class MainWindow : Window
 	/// handler for switching player
 	/// </summary>
 	/// <inheritdoc cref="Game.PlayerSwitchedEventHandler"/>
-	private void Game_PlayerSwitched( Game sender, Hue oldPlayer, Hue newPlayer )
+	private void Game_PlayerSwitched( Game sender, PlayerSwitchedDto d )
 	{
-		UpdatePlayerPresenter( newPlayer );
+		UpdatePlayerPresenter( d.NewPlayer );
 	}
 
 	/// <summary>
 	/// handler for game ending, increments player win count
 	/// </summary>
 	/// <inheritdoc cref="Game.GameEndedEventHandler"/>
-	private void Game_GameEnded( Game sender, Hue winner )
+	private void Game_GameEnded( Game sender, GameEndedDto d )
 	{
-		switch ( winner )
+		switch ( d.Winner )
 		{
 			case Hue.Red:
 				++RedWins;

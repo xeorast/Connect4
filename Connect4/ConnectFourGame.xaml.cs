@@ -1,4 +1,5 @@
-﻿using Connect4.Engine;
+﻿using Connect4.Domain.Core;
+using Connect4.Domain.Dtos.GameEvents;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
@@ -293,19 +294,19 @@ public partial class ConnectFourGame : UserControl
 	/// displays token
 	/// </summary>
 	/// <inheritdoc cref="Game.PlayerMovedEventHandler"/>
-	private void Game_PlayerMoved( Game sender, int col, int row, Hue hue )
+	private void Game_PlayerMoved( Game sender, PlayerMovedDto d )
 	{
-		ShowToken( col, row, hue );
+		ShowToken( d.Column, d.Row, d.Player );
 	}
 
 	/// <summary>
 	/// shows winner when game ends
 	/// </summary>
 	/// <inheritdoc cref="Game.GameEndedEventHandler"/>
-	private void Game_GameEnded( Game sender, Hue winner )
+	private void Game_GameEnded( Game sender, GameEndedDto d )
 	{
 		GameTimer?.Stop();
-		ShowWinner( winner );
+		ShowWinner( d.Winner );
 		ColorWinning();
 	}
 
@@ -313,9 +314,9 @@ public partial class ConnectFourGame : UserControl
 	/// disables column button
 	/// </summary>
 	/// <inheritdoc cref="Game.ColumnFilledEventHandler"/>
-	private void Game_ColumnFilled( Game sender, int col )
+	private void Game_ColumnFilled( Game sender, ColumnFilledDto d )
 	{
-		ColumnButtons[col].IsEnabled = false;
+		ColumnButtons[d.Column].IsEnabled = false;
 	}
 
 	private void Game_TurnCompleted( Game sender )

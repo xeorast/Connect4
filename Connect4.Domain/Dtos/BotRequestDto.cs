@@ -1,4 +1,4 @@
-﻿using Connect4.Engine;
+﻿using Connect4.Domain.Core;
 using System.ComponentModel.DataAnnotations;
 
 namespace Connect4.Domain.Dtos;

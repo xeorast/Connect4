@@ -1,7 +1,8 @@
-﻿using System.Text.Json;
+﻿using Connect4.Domain.Core;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Connect4.Engine.JsonConverters;
+namespace Connect4.Domain.JsonConverters;
 
 public class IWellJsonConverter : JsonConverter<IWell>
 {

@@ -1,5 +1,5 @@
-﻿using Connect4.Domain.Dtos;
-using Connect4.Engine;
+﻿using Connect4.Domain.Core;
+using Connect4.Domain.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Connect4.Api.Controllers;

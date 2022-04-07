@@ -10,8 +10,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Connect4.Engine\Connect4.Engine.csproj" />
-  </ItemGroup>
-
 </Project>

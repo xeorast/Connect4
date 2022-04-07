@@ -1,7 +1,7 @@
 global using Connect4.Api.Services;
 using Connect4.Api.Hubs;
 using Connect4.Data;
-using Connect4.Engine;
+using Connect4.Domain.Core;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 

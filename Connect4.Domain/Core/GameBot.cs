@@ -1,4 +1,4 @@
-﻿namespace Connect4.Engine;
+﻿namespace Connect4.Domain.Core;
 
 public class GameBot
 {
@@ -33,14 +33,14 @@ public class GameBot
 
 		return Enumerable
 			.Range( 0, well.Width )                                     // fot each column
-			.Where( col => !well.IsColumnFull( col ) )				// which is not full
+			.Where( col => !well.IsColumnFull( col ) )              // which is not full
 			.AsParallel()
 			.WithDegreeOfParallelism( well.Width )                      // parallelise every column
 			.Select( col =>
 				(column: col,
 				cost: CalculateCost( well, col, BotHue, MaxLevel )) )   // calculate cost of choosing it
-			.OrderBy( option => option.cost )		// choose cheapest
-			.ThenBy( option => rng.Next() )			// in case of two equal take random
+			.OrderBy( option => option.cost )       // choose cheapest
+			.ThenBy( option => rng.Next() )         // in case of two equal take random
 			.First()
 			.column;                                                    // return choosen column
 	}

@@ -1,4 +1,4 @@
-﻿namespace Connect4.Engine;
+﻿namespace Connect4.Domain.Core;
 
 /// <summary>
 /// colors of players

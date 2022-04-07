@@ -1,5 +1,5 @@
-﻿using Connect4.Engine;
-using Connect4.Engine.JsonConverters;
+﻿using Connect4.Domain.Core;
+using Connect4.Domain.JsonConverters;
 using System.Text.Json.Serialization;
 
 namespace Connect4.Domain.Dtos;

@@ -1,4 +1,4 @@
-﻿using Connect4.Engine;
+﻿using Connect4.Domain.Core;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,7 +7,7 @@ namespace Connect4.Domain.Models;
 [Index( nameof( Uuid ) )]
 public class GameModel
 {
-	public GameModel( Guid uuid, string state/*, int width, int height, int toConnect*/ )
+	public GameModel( Guid uuid, string state )
 	{
 		Uuid = uuid;
 		State = state;

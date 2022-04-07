@@ -1,8 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Connect4.Domain.Dtos.GameEvents;
+using Connect4.Domain.JsonConverters;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Connect4.Engine;
+namespace Connect4.Domain.Core;
 
 /// <summary>
 /// interface for json serialization
@@ -49,7 +51,7 @@ public class Game : IGame
 	/// <summary>
 	/// well copy for json serialization
 	/// </summary>
-	[JsonConverter( typeof( JsonConverters.IWellJsonConverter ) )]
+	[JsonConverter( typeof( IWellJsonConverter ) )]
 	public IWell WellClone => CloneWell();
 
 	Well Well { get; }
@@ -88,7 +90,7 @@ public class Game : IGame
 	/// <param name="col">column where token was placed</param>
 	/// <param name="row">row where token was placed</param>
 	/// <param name="hue">color of placed token</param>
-	public delegate void PlayerMovedEventHandler( Game sender, int col, int row, Hue hue );
+	public delegate void PlayerMovedEventHandler( Game sender, PlayerMovedDto d );
 	/// <summary>
 	/// called when player moves
 	/// </summary>
@@ -98,7 +100,7 @@ public class Game : IGame
 	/// </summary>
 	/// <param name="sender">game instance calling this event</param>
 	/// <param name="winner">game winner</param>
-	public delegate void GameEndedEventHandler( Game sender, Hue winner );
+	public delegate void GameEndedEventHandler( Game sender, GameEndedDto d );
 	/// <summary>
 	/// called when game ends, either with one winner or a draw
 	/// </summary>
@@ -108,7 +110,7 @@ public class Game : IGame
 	/// </summary>
 	/// <param name="sender">game instance calling this event</param>
 	/// <param name="col">column that got filled</param>
-	public delegate void ColumnFilledEventHandler( Game sender, int col );
+	public delegate void ColumnFilledEventHandler( Game sender, ColumnFilledDto d );
 	/// <summary>
 	/// called when column gets fully filled
 	/// </summary>
@@ -119,7 +121,7 @@ public class Game : IGame
 	/// <param name="sender">game instance calling this event</param>
 	/// <param name="oldPlayer">previous player</param>
 	/// <param name="newPlayer">current player</param>
-	public delegate void PlayerSwitchedEventHandler( Game sender, Hue oldPlayer, Hue newPlayer );
+	public delegate void PlayerSwitchedEventHandler( Game sender, PlayerSwitchedDto d );
 	/// <summary>
 	/// called when current player is switched
 	/// </summary>
@@ -162,11 +164,11 @@ public class Game : IGame
 			throw;
 		}
 
-		PlayerMoved?.Invoke( this, col, row, CurrentPlayer );
+		PlayerMoved?.Invoke( this, new( col, row, CurrentPlayer ) );
 
 		if ( Well.IsColumnFull( col ) )
 		{
-			ColumnFilled?.Invoke( this, col );
+			ColumnFilled?.Invoke( this, new( col ) );
 		}
 
 		if ( Well.IsFieldWinning( col, row, CurrentPlayer ) )
@@ -180,7 +182,7 @@ public class Game : IGame
 
 		if ( HasEnded )
 		{
-			GameEnded?.Invoke( this, (Hue)Winner );
+			GameEnded?.Invoke( this, new( (Hue)Winner ) );
 		}
 		else
 		{
@@ -217,7 +219,7 @@ public class Game : IGame
 		Hue old = CurrentPlayer;
 		CurrentPlayer = NextPlayer;
 
-		PlayerSwitched?.Invoke( this, old, CurrentPlayer );
+		PlayerSwitched?.Invoke( this, new( old, CurrentPlayer ) );
 	}
 
 	/// <summary>

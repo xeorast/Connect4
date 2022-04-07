@@ -1,7 +1,8 @@
-﻿using System.Text.Json;
+﻿using Connect4.Domain.JsonConverters;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Connect4.Engine;
+namespace Connect4.Domain.Core;
 
 /// <summary>
 /// interface for json serialization
@@ -9,7 +10,7 @@ namespace Connect4.Engine;
 public interface IWell
 {
 	int ToConnect { get; }
-	[JsonConverter( typeof( JsonConverters.Array2DJsonConverter<Hue> ) )]
+	[JsonConverter( typeof( Array2DJsonConverter<Hue> ) )]
 	Hue[,] WellObj { get; }
 }
 
@@ -18,8 +19,8 @@ public interface IWell
 /// </summary>
 public static class WellExtensions
 {
-	public static string SerializeToJson( this IWell s, JsonSerializerOptions? options = null )=>
-		JsonSerializer.Serialize( s, options );	
+	public static string SerializeToJson( this IWell s, JsonSerializerOptions? options = null ) =>
+		JsonSerializer.Serialize( s, options );
 }
 
 public class Well : IWell
@@ -53,7 +54,7 @@ public class Well : IWell
 	/// <remarks>
 	/// ordered as [column, row]
 	/// </remarks>
-	[JsonConverter( typeof( JsonConverters.Array2DJsonConverter<Hue> ) )]
+	[JsonConverter( typeof( Array2DJsonConverter<Hue> ) )]
 	public Hue[,] WellObj { get; set; }// col, row
 
 	/// <summary>

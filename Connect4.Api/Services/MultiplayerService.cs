@@ -1,9 +1,9 @@
 ﻿using Connect4.Api.Exceptions;
 using Connect4.Data;
+using Connect4.Domain.Core;
 using Connect4.Domain.Dtos;
 using Connect4.Domain.Dtos.GameEvents;
 using Connect4.Domain.Models;
-using Connect4.Engine;
 using Microsoft.EntityFrameworkCore;
 
 namespace Connect4.Api.Services;

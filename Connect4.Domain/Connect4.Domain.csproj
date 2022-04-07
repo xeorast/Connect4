@@ -14,8 +14,4 @@
     <ProjectReference Include="..\Connect4.Engine\Connect4.Engine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dtos\" />
-  </ItemGroup>
-
 </Project>

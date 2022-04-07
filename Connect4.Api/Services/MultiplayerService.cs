@@ -1,11 +1,19 @@
 ﻿using Connect4.Api.Exceptions;
 using Connect4.Data;
 using Connect4.Domain.Dtos;
+using Connect4.Domain.Dtos.GameEvents;
 using Connect4.Domain.Models;
 using Connect4.Engine;
 using Microsoft.EntityFrameworkCore;
 
 namespace Connect4.Api.Services;
+
+public record GameEvents(
+	Game.PlayerMovedEventHandler? PlayerMoved = null,
+	Game.GameEndedEventHandler? GameEnded = null,
+	Game.ColumnFilledEventHandler? ColumnFilled = null,
+	Game.PlayerSwitchedEventHandler? PlayerSwitched = null,
+	Game.TurnCompletedEventHandler? TurnCompleted = null );
 
 public interface IMultiplayerService
 {
@@ -19,8 +27,9 @@ public interface IMultiplayerService
 	/// <exception cref="NotFoundException">Game not found</exception>
 	/// <exception cref="ArgumentOutOfRangeException">Column out of range</exception>
 	/// <exception cref="InvalidOperationException">Game ended or column is full</exception>
-	Task MoveAsync( Guid uuid, int column );
+	Task<PlayerMovedDto> MoveAsync( Guid uuid, int column, GameEvents? events = null );
 	Task<GameDto?> GetBoardAsync( Guid uuid );
+	Task<bool> DoesGameExist( Guid uuid );
 }
 
 public class MultiplayerService : IMultiplayerService
@@ -58,17 +67,29 @@ public class MultiplayerService : IMultiplayerService
 	}
 
 	/// <inheritdoc/>
-	async Task IMultiplayerService.MoveAsync( Guid uuid, int column )
+	async Task<PlayerMovedDto> IMultiplayerService.MoveAsync( Guid uuid, int column, GameEvents? events )
 	{
 		var gameModel = await GetGameAsync( uuid )
 			?? throw new NotFoundException( "Game with given uuid not found" );
 
 		var game = gameModel.GetGameFromState();
-		_ = game.Move( column );
+		BindEvents( game, events );
+
+
+		var player = game.CurrentPlayer;
+		var row = game.Move( column );
 
 		gameModel.UpdateState( game );
-
 		_ = await _dbContext.SaveChangesAsync();
+
+		return new PlayerMovedDto( column, row, player );
+	}
+
+	async Task<bool> IMultiplayerService.DoesGameExist( Guid uuid )
+	{
+		return await _dbContext.Games
+			.Where( x => x.Uuid == uuid )
+			.AnyAsync();
 	}
 
 	private async Task<GameModel?> GetGameAsync( Guid uuid )
@@ -79,4 +100,19 @@ public class MultiplayerService : IMultiplayerService
 
 		return game;
 	}
+
+	private static void BindEvents( Game game, GameEvents? events )
+	{
+		if ( events is null )
+		{
+			return;
+		}
+
+		game.PlayerMoved += events.PlayerMoved;
+		game.GameEnded += events.GameEnded;
+		game.ColumnFilled += events.ColumnFilled;
+		game.PlayerSwitched += events.PlayerSwitched;
+		game.TurnCompleted += events.TurnCompleted;
+	}
+
 }

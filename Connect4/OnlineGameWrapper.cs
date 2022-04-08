@@ -2,23 +2,14 @@
 using Connect4.Domain.Core.GameWrappers;
 using Connect4.Domain.Dtos;
 using Connect4.Domain.Dtos.GameEvents;
+using Connect4.Multiplayer;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Net.Http;
 using System.Net.Http.Json;
 
 namespace Connect4;
 
-// todo: merge this with the one defined in c4.Api
-internal interface IGameClient
-{
-	Task PlayerMoved( PlayerMovedDto d );
-	Task GameEnded( GameEndedDto d );
-	Task ColumnFilled( ColumnFilledDto d );
-	Task PlayerSwitched( PlayerSwitchedDto d );
-	Task TurnCompleted();
-}
-
-internal class OnlineGameWrapper : GameWrapperBase, IGameClient, IDisposable
+internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposable
 {
 	private readonly HubConnection connection;
 
@@ -69,16 +60,11 @@ internal class OnlineGameWrapper : GameWrapperBase, IGameClient, IDisposable
 
 		disposables = new()
 		{
-			connection.On<PlayerMovedDto>(
-				nameof( IGameClient.PlayerMoved ), ( (IGameClient)this ).PlayerMoved ),
-			connection.On<GameEndedDto>(
-				nameof( IGameClient.GameEnded ), ( (IGameClient)this ).GameEnded ),
-			connection.On<ColumnFilledDto>(
-				nameof( IGameClient.ColumnFilled ), ( (IGameClient)this ).ColumnFilled ),
-			connection.On<PlayerSwitchedDto>(
-				nameof( IGameClient.PlayerSwitched ), ( (IGameClient)this ).PlayerSwitched ),
-			connection.On(
-				nameof( IGameClient.TurnCompleted ), ( (IGameClient)this ).TurnCompleted ),
+			connection.OnPlayerMoved( ( (IOnlineGameClient)this ).PlayerMoved ),
+			connection.OnGameEnded( ( (IOnlineGameClient)this ).GameEnded ),
+			connection.OnColumnFilled( ( (IOnlineGameClient)this ).ColumnFilled ),
+			connection.OnPlayerSwitched( ( (IOnlineGameClient)this ).PlayerSwitched ),
+			connection.OnTurnCompleted( ( (IOnlineGameClient)this ).TurnCompleted )
 		};
 
 		_ = connection.StartAsync();
@@ -86,7 +72,7 @@ internal class OnlineGameWrapper : GameWrapperBase, IGameClient, IDisposable
 
 	public override async void Move( int column ) // todo: make this return Task
 	{
-		await connection.InvokeAsync( nameof( Move ), column );
+		await connection.InvokeAsync( nameof( IOnlineGameServer.Move ), column );
 	}
 
 	public override void MoveBot( TimeSpan minMoveTime )
@@ -99,33 +85,33 @@ internal class OnlineGameWrapper : GameWrapperBase, IGameClient, IDisposable
 		return new Well( well, ToConnect ).GetWinning().Select( c => new Coordinate { Column = c.col, Row = c.row } );
 	}
 
-	Task IGameClient.PlayerMoved( PlayerMovedDto d )
+	Task IOnlineGameClient.PlayerMoved( PlayerMovedDto d )
 	{
 		well[d.Column, d.Row] = d.Player;
 
 		InvokePlayerMoved( d );
 		return Task.CompletedTask;
 	}
-	Task IGameClient.GameEnded( GameEndedDto d )
+	Task IOnlineGameClient.GameEnded( GameEndedDto d )
 	{
 		winner = d.Winner;
 
 		InvokeGameEnded( d );
 		return Task.CompletedTask;
 	}
-	Task IGameClient.ColumnFilled( ColumnFilledDto d )
+	Task IOnlineGameClient.ColumnFilled( ColumnFilledDto d )
 	{
 		InvokeColumnFilled( d );
 		return Task.CompletedTask;
 	}
-	Task IGameClient.PlayerSwitched( PlayerSwitchedDto d )
+	Task IOnlineGameClient.PlayerSwitched( PlayerSwitchedDto d )
 	{
 		currentPlayer = d.NewPlayer;
 
 		InvokePlayerSwitched( d );
 		return Task.CompletedTask;
 	}
-	Task IGameClient.TurnCompleted()
+	Task IOnlineGameClient.TurnCompleted()
 	{
 		InvokeTurnCompleted();
 		return Task.CompletedTask;

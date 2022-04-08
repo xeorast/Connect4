@@ -1,24 +1,16 @@
 ﻿using Connect4.Api.Exceptions;
 using Connect4.Domain.Core;
 using Connect4.Domain.Dtos.GameEvents;
+using Connect4.Multiplayer;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Connect4.Api.Hubs;
 
-public interface IGameClient
-{
-	Task PlayerMoved( PlayerMovedDto move );
-	Task GameEnded( GameEndedDto d );
-	Task ColumnFilled( ColumnFilledDto d );
-	Task PlayerSwitched( PlayerSwitchedDto d );
-	Task TurnCompleted();
-}
-
-public class GameHub : Hub<IGameClient>
+public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 {
 	private readonly IMultiplayerService _multiplayerService;
 
-	public string? GetGameId()
+	private string? GetGameId()
 	{
 		var id = Context.GetHttpContext()?.Request.Headers["GameId"].ToString();
 		if ( string.IsNullOrEmpty( id ) )
@@ -27,7 +19,7 @@ public class GameHub : Hub<IGameClient>
 		}
 		return id;
 	}
-	public Guid GetGameUuid()
+	private Guid GetGameUuid()
 	{
 		return Guid.Parse( GetGameId() ?? throw new NullReferenceException( "game id not specified" ) );
 	}
@@ -79,7 +71,7 @@ public class GameHub : Hub<IGameClient>
 
 	}
 
-	private IGameClient GetGameGroup( Guid uuid )
+	private IOnlineGameClient GetGameGroup( Guid uuid )
 	{
 		return Clients.Group( uuid.ToString() );
 	}

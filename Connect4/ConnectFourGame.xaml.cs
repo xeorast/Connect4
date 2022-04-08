@@ -1,4 +1,5 @@
 ﻿using Connect4.Domain.Core;
+using Connect4.Domain.Core.GameWrappers;
 using Connect4.Domain.Dtos.GameEvents;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
@@ -15,7 +16,7 @@ public partial class ConnectFourGame : UserControl
 	public const int rows = 6;
 	public const double timerInterval = 50;
 
-	public Game Game { get; set; }
+	public GameWrapperBase GameWrapper { get; set; }
 	/// <summary>
 	/// reference to tokens in grid stored in useful form
 	/// </summary>
@@ -28,16 +29,11 @@ public partial class ConnectFourGame : UserControl
 	/// </summary>
 	System.Timers.Timer GameTimer { get; set; }
 	volatile bool hasTurnEnded;
-	public int MinBotMoveTime { get; set; }
-	(Token token, Hue hue)? LastToken { get; set; }
-
-	Dictionary<Hue, GameBot> Bots { get; set; }
-	Dictionary<Hue, PlayerType> Players { get; set; } = new();
-	enum PlayerType
-	{
-		Player,
-		Computer
-	}
+	public TimeSpan MinBotMoveTime { get; set; }
+	(Token token, Hue hue)? LastToken =>
+		GameWrapper.PreviousMove is null ?
+			null
+			: (Tokens[GameWrapper.PreviousMove.Value.Column, GameWrapper.PreviousMove.Value.Row], GameWrapper[GameWrapper.PreviousMove.Value]);
 
 	public ConnectFourGame()
 	{
@@ -51,66 +47,40 @@ public partial class ConnectFourGame : UserControl
 		InitializeGame();
 	}
 
-	[MemberNotNull( nameof( Game ) )]
+	[MemberNotNull( nameof( GameWrapper ) )]
 	[MemberNotNull( nameof( Tokens ) )]
 	[MemberNotNull( nameof( ColumnButtons ) )]
-	[MemberNotNull( nameof( Bots ) )]
 	[MemberNotNull( nameof( GameTimer ) )]
 	void InitializeGame()
 	{
 		HideWinner();
 
 		// game
-		Game = new( width: columns, height: rows, starting: StartingPlayer );
+		GameWrapper = new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );//todo: use one type
 		StartingPlayer = StartingPlayer.Next( 2 );
+		GameWrapper.PlayerMoved += Game_PlayerMoved;
+		GameWrapper.GameEnded += Game_GameEnded;
+		GameWrapper.ColumnFilled += Game_ColumnFilled;
+		GameWrapper.TurnCompleted += Game_TurnCompleted;
 
-		Game.PlayerMoved += Game_PlayerMoved;
-		Game.GameEnded += Game_GameEnded;
-		Game.ColumnFilled += Game_ColumnFilled;
-		Game.TurnCompleted += Game_TurnCompleted;
+		GameSwitched?.Invoke( GameWrapper );
 
-		GameSwitched?.Invoke( Game );
-
-		InitializeBots();
+		MinBotMoveTime = new( 0, 0, 0, 0, UserSettings.Default.MinBotMoveTime );
 		InitializeGrid();
 		InitializeColumnButtons();
 		InitializeTimer();
 
-		bool disable = Players[Game.CurrentPlayer] is PlayerType.Computer;
+		bool disable = GameWrapper.IsNowBot;
 		foreach ( var button in ColumnButtons )
 		{
 			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );
 		}
 	}
 
-	[MemberNotNull( nameof( Bots ) )]
-	private void InitializeBots()
-	{
-		var level = Math.Clamp( UserSettings.Default.Difficulty, 1, 5 );
-		Bots = Enum.GetValues<Hue>()
-			.ToDictionary( hue => hue, hue => new GameBot( hue, level, 2 ) );
-
-		var player1 = UserSettings.Default.GameMode switch
-		{
-			GameMode.CvC => PlayerType.Computer,
-			_ => PlayerType.Player
-		};
-		var player2 = UserSettings.Default.GameMode switch
-		{
-			GameMode.PvP => PlayerType.Player,
-			_ => PlayerType.Computer
-		};
-
-		Players[Hue.Red] = player1;
-		Players[Hue.Yellow] = player2;
-
-		MinBotMoveTime = UserSettings.Default.MinBotMoveTime;
-	}
-
 	[MemberNotNull( nameof( Tokens ) )]
 	private void InitializeGrid()
 	{
-		Tokens = new Token[Game.Width, Game.Height];
+		Tokens = new Token[GameWrapper.Columns, GameWrapper.Rows];
 
 		gameGrid.Children.Clear();
 		gameGrid.Columns = columns;
@@ -161,7 +131,7 @@ public partial class ConnectFourGame : UserControl
 	/// handler for <see cref="GameSwitched"/> event
 	/// </summary>
 	/// <param name="game">new game instance</param>
-	public delegate void GameSwitchedHandler( Game game );
+	public delegate void GameSwitchedHandler( GameWrapperBase game );
 	/// <summary>
 	/// called when new game is initialized
 	/// </summary>
@@ -182,8 +152,6 @@ public partial class ConnectFourGame : UserControl
 		}
 
 		var key = GetNewTokenClass( hue );
-		LastToken = (Tokens[col, row], hue);
-
 		Tokens[col, row].Style = Application.Current.Resources[key] as Style;
 	}
 
@@ -216,18 +184,17 @@ public partial class ConnectFourGame : UserControl
 	/// </summary>
 	void ColorWinning()
 	{
-		if ( Game.Winner is Hue.None )
+		if ( GameWrapper.Winner is Hue.None )
 		{
 			return;
 		}
 
-		var well = Game.CloneWell();
-		foreach ( (int col, int row) in well.GetWinning() )
+		foreach ( Coordinate cord in GameWrapper.GetWinning() )
 		{
-			var hue = well.WellObj[col, row];
+			var hue = GameWrapper[cord];
 
 			var key = GetNegativeTokenClass( hue );
-			Tokens[col, row].Style = Application.Current.Resources[key] as Style;
+			Tokens[cord.Column, cord.Row].Style = Application.Current.Resources[key] as Style;
 		}
 	}
 
@@ -235,20 +202,17 @@ public partial class ConnectFourGame : UserControl
 	/// performs move based on bot decision
 	/// </summary>
 	/// <returns></returns>
-	async Task MoveBot()
+	void MoveBot()
 	{
-		var delay = Task.Delay( MinBotMoveTime );
 		//if ( Game.CurrentPlayer != Hue.Yellow )
 		//{
 		//	throw new Exception( "error" );
 		//}
-		var col = Bots[Game.CurrentPlayer].GetRecommendation( Game.CloneWell() );
-		await delay;
+		GameWrapper.MoveBot( MinBotMoveTime );
 		//if ( Game.CurrentPlayer != Hue.Yellow )
 		//{
 		//	throw new Exception( "worse error" );
 		//}
-		Dispatcher.Invoke( () => { _ = Game.Move( col ); } );
 	}
 
 	readonly SemaphoreSlim semaphore = new( 1, 1 );
@@ -257,18 +221,18 @@ public partial class ConnectFourGame : UserControl
 	/// </summary>
 	/// <param name="sender"></param>
 	/// <param name="e"></param>
-	private async void Timer_Elapsed( object? sender, System.Timers.ElapsedEventArgs e )
+	private void Timer_Elapsed( object? sender, System.Timers.ElapsedEventArgs e )
 	{
 		if ( !semaphore.Wait( (int)timerInterval ) )
 		{
 			return;
 		}
-		if ( hasTurnEnded && !Game.HasEnded )
+		if ( hasTurnEnded && !GameWrapper.HasEnded )
 		{
 			hasTurnEnded = false;
-			if ( Players[Game.CurrentPlayer] is PlayerType.Computer )
+			if ( GameWrapper.IsNowBot )
 			{
-				await MoveBot();
+				MoveBot();
 			}
 		}
 		_ = semaphore.Release();
@@ -281,11 +245,11 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="e"></param>
 	private void Column_Click( object sender, RoutedEventArgs e )
 	{
-		if ( Players[Game.CurrentPlayer] is PlayerType.Player )
+		if ( GameWrapper.IsNowPlayer )
 		{
 			var btn = (Button)sender;
 			var col = (int)btn.Tag;
-			_ = Game.Move( col );
+			GameWrapper.Move( col );
 		}
 
 	}
@@ -294,37 +258,37 @@ public partial class ConnectFourGame : UserControl
 	/// displays token
 	/// </summary>
 	/// <inheritdoc cref="Game.PlayerMovedEventHandler"/>
-	private void Game_PlayerMoved( Game sender, PlayerMovedDto d )
+	private void Game_PlayerMoved( object? sender, PlayerMovedDto d )
 	{
-		ShowToken( d.Column, d.Row, d.Player );
+		Dispatcher.Invoke( () => ShowToken( d.Column, d.Row, d.Player ) );
 	}
 
 	/// <summary>
 	/// shows winner when game ends
 	/// </summary>
 	/// <inheritdoc cref="Game.GameEndedEventHandler"/>
-	private void Game_GameEnded( Game sender, GameEndedDto d )
+	private void Game_GameEnded( object? sender, GameEndedDto d )
 	{
 		GameTimer?.Stop();
-		ShowWinner( d.Winner );
-		ColorWinning();
+		Dispatcher.Invoke( () => ShowWinner( d.Winner ) );
+		Dispatcher.Invoke( () => ColorWinning() );
 	}
 
 	/// <summary>
 	/// disables column button
 	/// </summary>
 	/// <inheritdoc cref="Game.ColumnFilledEventHandler"/>
-	private void Game_ColumnFilled( Game sender, ColumnFilledDto d )
+	private void Game_ColumnFilled( object? sender, ColumnFilledDto d )
 	{
-		ColumnButtons[d.Column].IsEnabled = false;
+		Dispatcher.Invoke( () => { ColumnButtons[d.Column].IsEnabled = false; } );
 	}
 
-	private void Game_TurnCompleted( Game sender )
+	private void Game_TurnCompleted( object? sender, EventArgs e )
 	{
-		bool disable = Players[Game.CurrentPlayer] is PlayerType.Computer;
+		bool disable = GameWrapper.IsNowBot;
 		foreach ( var button in ColumnButtons )
 		{
-			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );
+			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );//todo: this overrides column being full
 		}
 		hasTurnEnded = true;
 	}
@@ -335,7 +299,7 @@ public partial class ConnectFourGame : UserControl
 	/// </summary>
 	/// <param name="sender"></param>
 	/// <param name="e"></param>
-	private void EndScreen_Click( object sender, RoutedEventArgs e )
+	private void EndScreen_Click( object? sender, RoutedEventArgs e )
 	{
 		Restart();
 	}

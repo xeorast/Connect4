@@ -1,4 +1,5 @@
 ﻿using Connect4.Domain.Core;
+using Connect4.Domain.Core.GameWrappers;
 using Connect4.Domain.Dtos.GameEvents;
 using System.Windows;
 using System.Windows.Input;
@@ -28,7 +29,7 @@ public partial class MainWindow : Window
 	{
 		InitializeComponent();
 
-		C4_GameSwitched( c4.Game );
+		C4_GameSwitched( c4.GameWrapper );
 		c4.GameSwitched += C4_GameSwitched;
 	}
 
@@ -36,7 +37,7 @@ public partial class MainWindow : Window
 	/// subscribes to new game events
 	/// </summary>
 	/// <inheritdoc cref="ConnectFourGame.GameSwitchedHandler"/>
-	private void C4_GameSwitched( Game game )
+	private void C4_GameSwitched( GameWrapperBase game )
 	{
 		game.PlayerSwitched += Game_PlayerSwitched;
 		game.GameEnded += Game_GameEnded;
@@ -58,16 +59,16 @@ public partial class MainWindow : Window
 	/// handler for switching player
 	/// </summary>
 	/// <inheritdoc cref="Game.PlayerSwitchedEventHandler"/>
-	private void Game_PlayerSwitched( Game sender, PlayerSwitchedDto d )
+	private void Game_PlayerSwitched( object? sender, PlayerSwitchedDto d )
 	{
-		UpdatePlayerPresenter( d.NewPlayer );
+		Dispatcher.Invoke( () => UpdatePlayerPresenter( d.NewPlayer ) );
 	}
 
 	/// <summary>
 	/// handler for game ending, increments player win count
 	/// </summary>
 	/// <inheritdoc cref="Game.GameEndedEventHandler"/>
-	private void Game_GameEnded( Game sender, GameEndedDto d )
+	private void Game_GameEnded( object? sender, GameEndedDto d )
 	{
 		switch ( d.Winner )
 		{

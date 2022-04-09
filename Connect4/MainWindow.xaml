@@ -11,6 +11,7 @@
 		<CommandBinding Command="New" Executed="New_Command_Executed"/>
 		<CommandBinding Command="local:MainWindow.ExitCmd" Executed="Exit_Command_Executed"/>
 		<CommandBinding Command="local:MainWindow.OptionsCmd" Executed="Options_Command_Executed"/>
+		<CommandBinding Command="local:MainWindow.ConnectCmd" Executed="Connect_Command_Executed"/>
 	</Window.CommandBindings>
 	
 	<DockPanel>
@@ -18,6 +19,7 @@
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="_Game" >
 				<MenuItem Command="New"/>
+				<MenuItem Command="local:MainWindow.ConnectCmd"/>
 				<Separator/>
 				<MenuItem Command="local:MainWindow.ExitCmd"/>
 			</MenuItem>

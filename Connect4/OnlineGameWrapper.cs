@@ -37,21 +37,6 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 	}
 
 	bool wasConnected = false;
-	public async Task Connect()
-	{
-		if ( wasConnected )
-		{
-			throw new InvalidOperationException( "already connected" );
-		}
-
-		var createGameResp = await Http.PostAsync( "api/multiplayer", null ).ConfigureAwait( false );
-		var uuid = await createGameResp.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false );
-		System.Diagnostics.Debug.WriteLine( uuid );
-
-		await Connect( uuid ).ConfigureAwait( false );
-
-		wasConnected = true;
-	}
 	public async Task Connect( Guid uuid )
 	{
 		if ( wasConnected )

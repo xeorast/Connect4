@@ -48,20 +48,23 @@ public partial class ConnectFourGame : UserControl
 	{
 		InitializeGame();
 	}
+	public void Start( GameWrapperBase wrapper )
+	{
+		InitializeGame( wrapper );
+	}
 
 	[MemberNotNull( nameof( GameWrapper ) )]
 	[MemberNotNull( nameof( Tokens ) )]
 	[MemberNotNull( nameof( ColumnButtons ) )]
 	[MemberNotNull( nameof( GameTimer ) )]
-	void InitializeGame()
+	void InitializeGame( GameWrapperBase? wrapper = null )
 	{
 		HideWinner();
 
 		// game
-		//GameWrapper = new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );//todo: use one type
-		OnlineGameWrapper onlineGameWrapper = new( Hue.Red );
-		onlineGameWrapper.Connect(/* Guid.Parse( "6cc7ed1c-c3ae-4972-88cd-97f154ea27e1" ) */).GetAwaiter().GetResult();
-		GameWrapper = onlineGameWrapper;
+		GameWrapper = wrapper
+			?? new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );
+
 		StartingPlayer = StartingPlayer.Next( 2 );
 		GameWrapper.PlayerMoved += Game_PlayerMoved;
 		GameWrapper.GameEnded += Game_GameEnded;

@@ -1,0 +1,68 @@
+﻿<Window x:Class="Connect4.OnlineConnectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Connect4"
+        xmlns:localConverters="clr-namespace:Connect4.Converters"
+        xmlns:domainCore="clr-namespace:Connect4.Domain.Core;assembly=Connect4.Domain"
+        mc:Ignorable="d"
+		d:DataContext="{d:DesignInstance Type=local:OnlineConnectionWindow, IsDesignTimeCreatable=True}"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="OnlineConnectionWindow" 
+		Height="230" Width="350" ResizeMode="NoResize"
+		WindowStyle="ToolWindow">
+
+	<Window.Resources>
+		<localConverters:EnumBooleanConverter x:Key="EnumBooleanConverter"/>
+	</Window.Resources>
+
+	<Window.CommandBindings>
+		<CommandBinding Command="local:OnlineConnectionWindow.ConnectCmd" CanExecute="Connect_CanExecute" Executed="Connect_Executed"/>
+		<CommandBinding Command="local:OnlineConnectionWindow.CreateGameCmd" Executed="CreateGame_Executed"/>
+		<CommandBinding Command="Close" Executed="Close_Executed"/>
+	</Window.CommandBindings>
+
+	<StackPanel>
+		<BulletDecorator Margin="20,20,20,0">
+			<BulletDecorator.Bullet>
+				<Label>Game id</Label>
+			</BulletDecorator.Bullet>
+			<StackPanel>
+				<TextBox x:Name="UuidBox"
+					 VerticalAlignment="Center">
+					
+				</TextBox>
+				<Button Command="local:OnlineConnectionWindow.CreateGameCmd" 
+						Margin="0,5,0,0"
+						HorizontalAlignment="Right">Create new</Button>
+
+			</StackPanel>
+		</BulletDecorator>
+
+		<StackPanel Margin="20,10,20,10">
+			<Label>Join as</Label>
+			<RadioButton GroupName="GameMode"
+						 d:IsChecked="True"
+						 IsChecked="{Binding Path=SelectedPlayer, 
+									Converter={StaticResource EnumBooleanConverter},
+									ConverterParameter={x:Static domainCore:Hue.Red}}"
+						 Margin="10,0,0,0">
+				Red
+			</RadioButton>
+			<RadioButton GroupName="GameMode"
+						 IsChecked="{Binding Path=SelectedPlayer, 
+									Converter={StaticResource EnumBooleanConverter}, 
+									ConverterParameter={x:Static domainCore:Hue.Yellow}}"  
+						 Margin="10,0,0,0">
+				Yellow
+			</RadioButton>
+		</StackPanel>
+
+		<UniformGrid Margin="20,10,20,0" Rows="1">
+			<Button Command="local:OnlineConnectionWindow.ConnectCmd" IsDefault="True" Margin="0,0,5,0">Connect</Button>
+			<Button Command="Close" IsCancel="True" Margin="5,0,0,0">Cancel</Button>
+		</UniformGrid>
+
+	</StackPanel>
+</Window>

@@ -13,6 +13,7 @@ public partial class MainWindow : Window
 {
 	public static RoutedUICommand ExitCmd { get; } = new RoutedUICommand( "Exit", "ExitCmd", typeof( MainWindow ) );
 	public static RoutedUICommand OptionsCmd { get; } = new RoutedUICommand( "Options", "OptionsCmd", typeof( MainWindow ) );
+	public static RoutedUICommand ConnectCmd { get; } = new RoutedUICommand( "Connect", "ConnectCmd", typeof( MainWindow ) );
 
 	public int RedWins
 	{
@@ -102,5 +103,17 @@ public partial class MainWindow : Window
 	{
 		OptionsWindow options = new() { Owner = this, ShowInTaskbar = false };
 		_ = options.ShowDialog();
+	}
+
+	private void Connect_Command_Executed( object sender, System.Windows.Input.ExecutedRoutedEventArgs e )
+	{
+		OnlineConnectionWindow connect = new() { Owner = this, ShowInTaskbar = false };
+		if ( connect.ShowDialog() is true && connect.SelectedUuid is not null )
+		{
+			OnlineGameWrapper onlineGameWrapper = new( connect.SelectedPlayer );
+			onlineGameWrapper.Connect( connect.SelectedUuid.Value ).GetAwaiter().GetResult();
+
+			c4.Start( onlineGameWrapper );
+		}
 	}
 }

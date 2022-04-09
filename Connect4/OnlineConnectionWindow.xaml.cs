@@ -52,7 +52,7 @@ public partial class OnlineConnectionWindow : Window
 
 	private async void Connect_Executed( object sender, ExecutedRoutedEventArgs e )
 	{
-		if ( SelectedUuid is null && await CheckExists() )
+		if ( SelectedUuid is null || !await CheckExists() )
 		{
 			UuidBox.Background = Brushes.Red;
 			UuidBox.Foreground = Brushes.White;

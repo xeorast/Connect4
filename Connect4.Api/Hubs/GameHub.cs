@@ -24,6 +24,20 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 		return Guid.Parse( GetGameId() ?? throw new NullReferenceException( "game id not specified" ) );
 	}
 
+	private string? GetPlayerStr()
+	{
+		var player = Context.GetHttpContext()?.Request.Headers["Player"].ToString();
+		if ( string.IsNullOrEmpty( player ) )
+		{
+			return null;
+		}
+		return player;
+	}
+	private Hue GetPlayer()
+	{
+		return Enum.Parse<Hue>( GetPlayerStr() ?? throw new NullReferenceException( "player not specified" ) );
+	}
+
 	public GameHub( IMultiplayerService multiplayerService )
 	{
 		_multiplayerService = multiplayerService;
@@ -54,7 +68,7 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 		var uuid = GetGameUuid();
 		try
 		{
-			_ = await _multiplayerService.MoveAsync( uuid, column, GetEvents( uuid ) );
+			_ = await _multiplayerService.MoveAsync( uuid, column, requestingPlayer: GetPlayer(), events: GetEvents( uuid ) );
 		}
 		catch ( NotFoundException e )
 		{

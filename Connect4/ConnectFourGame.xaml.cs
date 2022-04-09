@@ -35,6 +35,8 @@ public partial class ConnectFourGame : UserControl
 			null
 			: (Tokens[GameWrapper.PreviousMove.Value.Column, GameWrapper.PreviousMove.Value.Row], GameWrapper[GameWrapper.PreviousMove.Value]);
 
+	bool CanMove => GameWrapper is GameWrapperBase { IsNowPlayer: true, CanMove: true, HasEnded: false };
+
 	public ConnectFourGame()
 	{
 		InitializeComponent();
@@ -57,8 +59,8 @@ public partial class ConnectFourGame : UserControl
 
 		// game
 		//GameWrapper = new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );//todo: use one type
-		OnlineGameWrapper onlineGameWrapper = new();
-		onlineGameWrapper.Connect().GetAwaiter().GetResult();
+		OnlineGameWrapper onlineGameWrapper = new( Hue.Red );
+		onlineGameWrapper.Connect(/* Guid.Parse( "6cc7ed1c-c3ae-4972-88cd-97f154ea27e1" ) */).GetAwaiter().GetResult();
 		GameWrapper = onlineGameWrapper;
 		StartingPlayer = StartingPlayer.Next( 2 );
 		GameWrapper.PlayerMoved += Game_PlayerMoved;
@@ -73,10 +75,10 @@ public partial class ConnectFourGame : UserControl
 		InitializeColumnButtons();
 		InitializeTimer();
 
-		bool disable = GameWrapper.IsNowBot;
+		bool enable = CanMove;
 		foreach ( var button in ColumnButtons )
 		{
-			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );
+			Dispatcher.Invoke( () => { button.IsEnabled = enable; } );
 		}
 	}
 
@@ -248,7 +250,7 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="e"></param>
 	private void Column_Click( object sender, RoutedEventArgs e )
 	{
-		if ( GameWrapper.IsNowPlayer )
+		if ( CanMove )
 		{
 			var btn = (Button)sender;
 			var col = (int)btn.Tag;
@@ -288,10 +290,10 @@ public partial class ConnectFourGame : UserControl
 
 	private void Game_TurnCompleted( object? sender, EventArgs e )
 	{
-		bool disable = GameWrapper.IsNowBot;
+		bool enable = CanMove;
 		foreach ( var button in ColumnButtons )
 		{
-			Dispatcher.Invoke( () => { button.IsEnabled = !disable; } );//todo: this overrides column being full
+			Dispatcher.Invoke( () => { button.IsEnabled = enable; } );//todo: this overrides column being full
 		}
 		hasTurnEnded = true;
 	}

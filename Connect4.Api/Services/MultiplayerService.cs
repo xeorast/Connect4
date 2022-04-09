@@ -27,7 +27,7 @@ public interface IMultiplayerService
 	/// <exception cref="NotFoundException">Game not found</exception>
 	/// <exception cref="ArgumentOutOfRangeException">Column out of range</exception>
 	/// <exception cref="InvalidOperationException">Game ended or column is full</exception>
-	Task<PlayerMovedDto> MoveAsync( Guid uuid, int column, GameEvents? events = null );
+	Task<PlayerMovedDto> MoveAsync( Guid uuid, int column, Hue? requestingPlayer = null, GameEvents? events = null );
 	Task<GameDto?> GetBoardAsync( Guid uuid );
 	Task<bool> DoesGameExist( Guid uuid );
 }
@@ -67,16 +67,21 @@ public class MultiplayerService : IMultiplayerService
 	}
 
 	/// <inheritdoc/>
-	async Task<PlayerMovedDto> IMultiplayerService.MoveAsync( Guid uuid, int column, GameEvents? events )
+	async Task<PlayerMovedDto> IMultiplayerService.MoveAsync( Guid uuid, int column, Hue? requestingPlayer, GameEvents? events )
 	{
 		var gameModel = await GetGameAsync( uuid )
 			?? throw new NotFoundException( "Game with given uuid not found" );
 
 		var game = gameModel.GetGameFromState();
+		var player = game.CurrentPlayer;
+		if ( requestingPlayer is not null && requestingPlayer != player )
+		{
+			throw new InvalidOperationException( "wrong player requested move" );
+		}
+
+
 		BindEvents( game, events );
 
-
-		var player = game.CurrentPlayer;
 		var row = game.Move( column );
 
 		gameModel.UpdateState( game );

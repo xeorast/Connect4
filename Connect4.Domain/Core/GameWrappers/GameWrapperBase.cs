@@ -17,7 +17,7 @@ public abstract class GameWrapperBase
 	public int Rows { get; protected set; }
 	public int ToConnect { get; protected set; }
 
-	public abstract bool HasEnded { get; }
+	public virtual bool HasEnded => Winner is not null;
 	public Hue StartingPlayer { get; protected set; }
 	public abstract Hue CurrentPlayer { get; }
 	public abstract Hue? Winner { get; }
@@ -38,6 +38,7 @@ public abstract class GameWrapperBase
 
 	public bool IsNowPlayer => Players[CurrentPlayer] is PlayerType.Player;
 	public bool IsNowBot => Players[CurrentPlayer] is PlayerType.Computer;
+	public abstract bool CanMove { get; }
 
 	public event EventHandler<PlayerMovedDto>? PlayerMoved;
 	public event EventHandler<GameEndedDto>? GameEnded;

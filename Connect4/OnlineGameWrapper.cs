@@ -12,22 +12,28 @@ namespace Connect4;
 internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposable
 {
 	private HubConnection connection;
+	HttpClient Http { get; } = new() { BaseAddress = new( "https://localhost:7126" ) };
 
 	public override Hue this[Coordinate cord] => well[cord.Column, cord.Row];
-	private Hue[,] well;
 	public override Hue CurrentPlayer => currentPlayer;
-	private Hue currentPlayer;
 	public override Hue? Winner => winner;
+	public override bool CanMove => BoundPlayer == currentPlayer && wasMoveCompleted;
+
+	private Hue[,] well;
+	private Hue currentPlayer;
 	private Hue? winner;
-	public override bool HasEnded => Winner is not null;
+	private bool wasMoveCompleted = true;
+
+	public Hue BoundPlayer { get; set; }
+
 
 	private readonly List<IDisposable> disposables = new();
 
-
-	public OnlineGameWrapper()// todo: allow parameters
+	public OnlineGameWrapper( Hue player )// todo: allow parameters
 	{
 		well = null!;
 		connection = null!;
+		BoundPlayer = player;
 	}
 
 	bool wasConnected = false;
@@ -37,15 +43,25 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 		{
 			throw new InvalidOperationException( "already connected" );
 		}
+
+		var createGameResp = await Http.PostAsync( "api/multiplayer", null ).ConfigureAwait( false );
+		var uuid = await createGameResp.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false );
+		System.Diagnostics.Debug.WriteLine( uuid );
+
+		await Connect( uuid ).ConfigureAwait( false );
+
 		wasConnected = true;
+	}
+	public async Task Connect( Guid uuid )
+	{
+		if ( wasConnected )
+		{
+			throw new InvalidOperationException( "already connected" );
+		}
 
-		HttpClient http = new() { BaseAddress = new( "https://localhost:7126" ) };
+		Uuid = uuid;
 
-		var createGameResp = await http.PostAsync( "api/multiplayer", null ).ConfigureAwait( false );
-		Uuid = await createGameResp.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false );
-		System.Diagnostics.Debug.WriteLine( Uuid );
-
-		var game = await http.GetFromJsonAsync<GameDto>( $"api/multiplayer/{Uuid}" ).ConfigureAwait( false )
+		var game = await Http.GetFromJsonAsync<GameDto>( $"api/multiplayer/{Uuid}" ).ConfigureAwait( false )
 			?? throw new Exception( "unable to create game" );
 
 		ToConnect = game.Well.ToConnect;
@@ -61,7 +77,7 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 		Dictionary<string, string>? headers = new()
 		{
 			["GameId"] = Uuid.ToString(),
-			["Player"] = Hue.Red.ToString( "d" )
+			["Player"] = BoundPlayer.ToString( "d" )
 		};
 
 		connection = new HubConnectionBuilder()
@@ -77,18 +93,17 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 		disposables.Add( connection.OnTurnCompleted( ( (IOnlineGameClient)this ).TurnCompleted ) );
 
 		await connection.StartAsync().ConfigureAwait( false );
+
+		wasConnected = true;
 	}
 
 	public override async void Move( int column ) // todo: make this return Task
 	{
+		wasMoveCompleted = false;
 		await connection.InvokeAsync( nameof( IOnlineGameServer.Move ), column );
+		wasMoveCompleted = true;
 	}
-
-	public override void MoveBot( TimeSpan minMoveTime )
-	{
-		throw new NotImplementedException(); // as for now (only two players possible) there is no point in online with bot
-	}
-
+	public override void MoveBot( TimeSpan minMoveTime ) => throw new NotImplementedException(); // as for now (only two players possible) there is no point in online with bot
 	public override IEnumerable<Coordinate> GetWinning()
 	{
 		return new Well( well, ToConnect ).GetWinning().Select( c => new Coordinate { Column = c.col, Row = c.row } );

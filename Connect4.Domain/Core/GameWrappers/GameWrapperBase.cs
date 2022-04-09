@@ -12,6 +12,7 @@ public abstract class GameWrapperBase
 {
 	public Guid Uuid { get; protected set; }
 	public abstract Hue this[Coordinate cord] { get; }
+	public virtual Hue this[int column, int row] => this[new() { Column = column, Row = row }];
 
 	public int Columns { get; protected set; }
 	public int Rows { get; protected set; }

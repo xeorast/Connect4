@@ -53,7 +53,7 @@ public partial class MainWindow : Window
 	void UpdatePlayerPresenter( Hue hue )
 	{
 		var key = ConnectFourGame.GetTokenClass( hue );
-		status.playerPresenter.Style = Application.Current.Resources[key] as Style;
+		status.playerPresenter.Style = ConnectFourGame.LoadStyle( key );
 	}
 
 	/// <summary>

@@ -94,16 +94,22 @@ public partial class ConnectFourGame : UserControl
 		gameGrid.Columns = columns;
 		gameGrid.Rows = rows;
 
-		var tokenStyle = Application.Current.Resources["HiddenToken"] as Style;
 
 		for ( int row = rows - 1; row >= 0; row-- )
 		{
 			for ( int col = 0; col < columns; col++ )
 			{
+				var tokenStyle = LoadStyle( GetTokenClass( GameWrapper[col, row] ) );
+
 				Token token = new() { Style = tokenStyle };
 				Tokens[col, row] = token;
 				_ = gameGrid.Children.Add( token );
 			}
+		}
+
+		if ( GameWrapper.PreviousMove is Coordinate c )
+		{
+			Tokens[c.Column, c.Row].Style = LoadStyle( GetNewTokenClass( GameWrapper[c] ) );
 		}
 	}
 
@@ -153,14 +159,12 @@ public partial class ConnectFourGame : UserControl
 	/// <param name="hue">color</param>
 	void ShowToken( int col, int row, Hue hue )
 	{
-		if ( LastToken is not null )
+		if ( LastToken is (Token, Hue ) t )
 		{
-			var lastKey = GetTokenClass( LastToken.Value.hue );
-			LastToken.Value.token.Style = Application.Current.Resources[lastKey] as Style;
+			t.token.Style = LoadStyle( GetTokenClass( t.hue ) );
 		}
 
-		var key = GetNewTokenClass( hue );
-		Tokens[col, row].Style = Application.Current.Resources[key] as Style;
+		Tokens[col, row].Style = LoadStyle( GetNewTokenClass( hue ) );
 	}
 
 	/// <summary>
@@ -201,8 +205,7 @@ public partial class ConnectFourGame : UserControl
 		{
 			var hue = GameWrapper[cord];
 
-			var key = GetNegativeTokenClass( hue );
-			Tokens[cord.Column, cord.Row].Style = Application.Current.Resources[key] as Style;
+			Tokens[cord.Column, cord.Row].Style = LoadStyle( GetNegativeTokenClass( hue ) );
 		}
 	}
 
@@ -312,6 +315,11 @@ public partial class ConnectFourGame : UserControl
 		Restart();
 	}
 
+	public static Style? LoadStyle( string key )
+	{
+		return Application.Current.Resources[key] as Style;
+	}
+
 	/// <summary>
 	/// gets name of token style corresponding to given color
 	/// </summary>
@@ -321,6 +329,7 @@ public partial class ConnectFourGame : UserControl
 	{
 		return hue switch
 		{
+			Hue.None => "HiddenToken",
 			Hue.Yellow => "YellowToken",
 			Hue.Red => "RedToken",
 			_ => "PinkToken",

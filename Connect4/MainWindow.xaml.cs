@@ -70,19 +70,22 @@ public partial class MainWindow : Window
 	/// <inheritdoc cref="Game.GameEndedEventHandler"/>
 	private void Game_GameEnded( object? sender, GameEndedDto d )
 	{
-		switch ( d.Winner )
+		Dispatcher.Invoke( () =>
 		{
-			case Hue.Red:
-				++RedWins;
-				break;
+			switch ( d.Winner )
+			{
+				case Hue.Red:
+					++RedWins;
+					break;
 
-			case Hue.Yellow:
-				++YellowWins;
-				break;
+				case Hue.Yellow:
+					++YellowWins;
+					break;
 
-			default:
-				break;
-		}
+				default:
+					break;
+			};
+		} );
 	}
 
 	private void New_Command_Executed( object sender, System.Windows.Input.ExecutedRoutedEventArgs e )

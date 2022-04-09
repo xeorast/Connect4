@@ -57,7 +57,9 @@ public partial class ConnectFourGame : UserControl
 
 		// game
 		//GameWrapper = new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );//todo: use one type
-		GameWrapper = new OnlineGameWrapper();
+		OnlineGameWrapper onlineGameWrapper = new();
+		onlineGameWrapper.Connect().GetAwaiter().GetResult();
+		GameWrapper = onlineGameWrapper;
 		StartingPlayer = StartingPlayer.Next( 2 );
 		GameWrapper.PlayerMoved += Game_PlayerMoved;
 		GameWrapper.GameEnded += Game_GameEnded;

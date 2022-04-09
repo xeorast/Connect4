@@ -36,11 +36,13 @@ public partial class OnlineConnectionWindow : Window
 		InitializeComponent();
 	}
 
-	private void CreateGame_Executed( object sender, ExecutedRoutedEventArgs e )
+	private async void CreateGame_Executed( object sender, ExecutedRoutedEventArgs e )
 	{
-		var uuid = CreateNew().Result;
+		var uuid = await CreateNew();
 		SelectedUuid = uuid;
 		Clipboard.SetText( uuid.ToString() );
+
+		CommandManager.InvalidateRequerySuggested();
 	}
 
 	private void Connect_CanExecute( object sender, CanExecuteRoutedEventArgs e )
@@ -48,9 +50,9 @@ public partial class OnlineConnectionWindow : Window
 		e.CanExecute = SelectedUuid is not null;
 	}
 
-	private void Connect_Executed( object sender, ExecutedRoutedEventArgs e )
+	private async void Connect_Executed( object sender, ExecutedRoutedEventArgs e )
 	{
-		if ( SelectedUuid is null && CheckExists().Result )
+		if ( SelectedUuid is null && await CheckExists() )
 		{
 			UuidBox.Background = Brushes.Red;
 			UuidBox.Foreground = Brushes.White;
@@ -64,6 +66,8 @@ public partial class OnlineConnectionWindow : Window
 
 	private void Close_Executed( object sender, ExecutedRoutedEventArgs e )
 	{
+		DialogResult = false;
+		Close();
 	}
 
 	HttpClient Http { get; } = new() { BaseAddress = new( "https://localhost:7126" ) };

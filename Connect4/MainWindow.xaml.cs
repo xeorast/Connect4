@@ -105,13 +105,13 @@ public partial class MainWindow : Window
 		_ = options.ShowDialog();
 	}
 
-	private void Connect_Command_Executed( object sender, System.Windows.Input.ExecutedRoutedEventArgs e )
+	private async void Connect_Command_Executed( object sender, System.Windows.Input.ExecutedRoutedEventArgs e )
 	{
 		OnlineConnectionWindow connect = new() { Owner = this, ShowInTaskbar = false };
 		if ( connect.ShowDialog() is true && connect.SelectedUuid is not null )
 		{
 			OnlineGameWrapper onlineGameWrapper = new( connect.SelectedPlayer );
-			onlineGameWrapper.Connect( connect.SelectedUuid.Value ).GetAwaiter().GetResult();
+			await onlineGameWrapper.Connect( connect.SelectedUuid.Value );
 
 			c4.Start( onlineGameWrapper );
 		}

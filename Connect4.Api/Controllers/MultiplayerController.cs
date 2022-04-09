@@ -31,7 +31,9 @@ public class MultiplayerController : ControllerBase
 	[HttpPost]
 	public async Task<ActionResult<Guid>> CreateGame()
 	{
-		return Ok( await _multiplayerService.CreateGameAsync() );
+		var uuid = await _multiplayerService.CreateGameAsync();
+
+		return CreatedAtAction( nameof( GetBoard ), new { uuid }, uuid );
 	}
 
 	[HttpPost( "{uuid}/move" )]

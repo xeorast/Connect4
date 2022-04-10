@@ -75,7 +75,9 @@ internal class OnlineGameWrapper : GameWrapperBase
 	public override void MoveBot( TimeSpan minMoveTime ) => throw new NotImplementedException(); // as for now (only two players possible) there is no point in online with bot
 	public override IEnumerable<Coordinate> GetWinning()
 	{
-		return new Well( well, ToConnect ).GetWinning().Select( c => new Coordinate { Column = c.col, Row = c.row } );
+		return new Well( well, ToConnect )
+			.GetWinning()
+			.Select( c => (Coordinate)c );
 	}
 
 	private Task RealTimeMultiplayer_PlayerMoved( object sender, PlayerMovedDto d )

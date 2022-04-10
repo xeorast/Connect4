@@ -6,6 +6,15 @@ public struct Coordinate
 {
 	public int Column { get; set; }
 	public int Row { get; set; }
+
+	public static explicit operator (int column, int row)( Coordinate c )
+	{
+		return (c.Column, c.Row);
+	}
+	public static explicit operator Coordinate( (int column, int row) s )
+	{
+		return new Coordinate { Row = s.column, Column = s.row };
+	}
 }
 
 public abstract class GameWrapperBase

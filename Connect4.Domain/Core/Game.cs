@@ -1,4 +1,5 @@
-﻿using Connect4.Domain.Dtos.GameEvents;
+﻿using Connect4.Domain.Core.GameWrappers;
+using Connect4.Domain.Dtos.GameEvents;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Connect4.Domain.Core;
@@ -29,6 +30,9 @@ public class Game
 
 	public Hue CurrentPlayer { get; private set; }
 	public Hue NextPlayer => CurrentPlayer.Next( NumberPlayers );
+
+	public Hue this[Coordinate cord] => Well.WellObj[cord.Column, cord.Row];
+
 
 	/// <summary>
 	/// creates game with given parameters

@@ -15,7 +15,7 @@ public class LocalGameWrapper : GameWrapperBase
 
 	public override bool CanMove => true;
 
-	public override Hue this[Coordinate cord] => Game.CloneWell().WellObj[cord.Column, cord.Row];
+	public override Hue this[Coordinate cord] => Game[cord];
 
 	public LocalGameWrapper( int columns, int rows, Hue startingPlayer, GameMode gameMode )
 	{

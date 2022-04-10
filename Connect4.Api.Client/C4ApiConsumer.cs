@@ -23,6 +23,7 @@ public partial class C4ApiConsumer
 	public C4ApiConsumer_Multiplayer_RealTime RealTimeMultiplayer => realTimeMultiplayer.Value;
 	private readonly Lazy<C4ApiConsumer_Multiplayer_RealTime> realTimeMultiplayer;
 
+	public C4ApiConsumer( string baseAddress ) : this( new Uri( baseAddress ) ) { }
 	public C4ApiConsumer( Uri baseAddress )
 	{
 		BaseAddress = baseAddress;

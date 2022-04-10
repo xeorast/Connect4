@@ -25,7 +25,7 @@ public partial class C4ApiConsumer
 		{
 			var connection = new HubConnectionBuilder()
 				.WithUrl(
-				   Api.BaseAddress,
+				new Uri( Api.BaseAddress, "/multiplayer" ),
 				   options => options.Headers = Headers )
 				.Build();
 
@@ -40,7 +40,7 @@ public partial class C4ApiConsumer
 		}
 
 		// connecting
-		public async Task Connect()
+		public async Task ConnectAsync()
 		{
 			if ( !Headers.IsGameIdSet )
 			{

@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Connect4.Api.Client\Connect4.Api.Client.csproj" />
     <ProjectReference Include="..\Connect4.Domain\Connect4.Domain.csproj" />
     <ProjectReference Include="..\Connect4.Multiplayer\Connect4.Multiplayer.csproj" />
   </ItemGroup>

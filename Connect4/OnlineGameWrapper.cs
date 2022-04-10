@@ -1,18 +1,13 @@
-﻿using Connect4.Domain.Core;
+﻿using Connect4.Api.Client;
+using Connect4.Domain.Core;
 using Connect4.Domain.Core.GameWrappers;
-using Connect4.Domain.Dtos;
 using Connect4.Domain.Dtos.GameEvents;
-using Connect4.Multiplayer;
-using Microsoft.AspNetCore.SignalR.Client;
-using System.Net.Http;
-using System.Net.Http.Json;
 
 namespace Connect4;
 
-internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposable
+internal class OnlineGameWrapper : GameWrapperBase
 {
-	private HubConnection connection;
-	HttpClient Http { get; } = new() { BaseAddress = new( "https://localhost:7126" ) };
+	C4ApiConsumer Api { get; }
 
 	public override Hue this[Coordinate cord] => well[cord.Column, cord.Row];
 	public override Hue CurrentPlayer => currentPlayer;
@@ -26,13 +21,10 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 
 	public Hue BoundPlayer { get; set; }
 
-
-	private readonly List<IDisposable> disposables = new();
-
-	public OnlineGameWrapper( Hue player )// todo: allow parameters
+	public OnlineGameWrapper( Hue player )
 	{
 		well = null!;
-		connection = null!;
+		Api = new( "https://localhost:7126" );
 		BoundPlayer = player;
 	}
 
@@ -46,8 +38,8 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 
 		Uuid = uuid;
 
-		var game = await Http.GetFromJsonAsync<GameDto>( $"api/multiplayer/{Uuid}" ).ConfigureAwait( false )
-			?? throw new Exception( "unable to create game" );
+		var game = await Api.Multiplayer.GetBoard( uuid ).ConfigureAwait( false )
+			?? throw new NullReferenceException( "game not found" );
 
 		ToConnect = game.Well.ToConnect;
 		well = game.Well.Well;
@@ -59,25 +51,17 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 		Players[Hue.Red] = PlayerType.Player;
 		Players[Hue.Yellow] = PlayerType.Player;
 
-		Dictionary<string, string>? headers = new()
-		{
-			["GameId"] = Uuid.ToString(),
-			["Player"] = BoundPlayer.ToString( "d" )
-		};
+		Api.RealTimeMultiplayer.PlayerMoved += RealTimeMultiplayer_PlayerMoved;
+		Api.RealTimeMultiplayer.GameEnded += RealTimeMultiplayer_GameEnded;
+		Api.RealTimeMultiplayer.ColumnFilled += RealTimeMultiplayer_ColumnFilled;
+		Api.RealTimeMultiplayer.PlayerSwitched += RealTimeMultiplayer_PlayerSwitched;
+		Api.RealTimeMultiplayer.TurnCompleted += RealTimeMultiplayer_TurnCompleted;
 
-		connection = new HubConnectionBuilder()
-			.WithUrl(
-				"https://localhost:7126/multiplayer",
-				options => options.Headers = headers )
-			.Build();
-
-		disposables.Add( connection.OnPlayerMoved( ( (IOnlineGameClient)this ).PlayerMoved ) );
-		disposables.Add( connection.OnGameEnded( ( (IOnlineGameClient)this ).GameEnded ) );
-		disposables.Add( connection.OnColumnFilled( ( (IOnlineGameClient)this ).ColumnFilled ) );
-		disposables.Add( connection.OnPlayerSwitched( ( (IOnlineGameClient)this ).PlayerSwitched ) );
-		disposables.Add( connection.OnTurnCompleted( ( (IOnlineGameClient)this ).TurnCompleted ) );
-
-		await connection.StartAsync().ConfigureAwait( false );
+		await Api.RealTimeMultiplayer
+			.WithGameId( uuid )
+			.PlayingAsPlayer( BoundPlayer )
+			.ConnectAsync()
+			.ConfigureAwait( false );
 
 		wasConnected = true;
 	}
@@ -85,7 +69,7 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 	public override async void Move( int column ) // todo: make this return Task
 	{
 		wasMoveCompleted = false;
-		await connection.InvokeAsync( nameof( IOnlineGameServer.Move ), column );
+		await Api.RealTimeMultiplayer.Move( column ).ConfigureAwait( false );
 		wasMoveCompleted = true;
 	}
 	public override void MoveBot( TimeSpan minMoveTime ) => throw new NotImplementedException(); // as for now (only two players possible) there is no point in online with bot
@@ -94,45 +78,36 @@ internal class OnlineGameWrapper : GameWrapperBase, IOnlineGameClient, IDisposab
 		return new Well( well, ToConnect ).GetWinning().Select( c => new Coordinate { Column = c.col, Row = c.row } );
 	}
 
-	Task IOnlineGameClient.PlayerMoved( PlayerMovedDto d )
+	private Task RealTimeMultiplayer_PlayerMoved( object sender, PlayerMovedDto d )
 	{
 		well[d.Column, d.Row] = d.Player;
 
 		InvokePlayerMoved( d );
 		return Task.CompletedTask;
 	}
-	Task IOnlineGameClient.GameEnded( GameEndedDto d )
+	private Task RealTimeMultiplayer_GameEnded( object sender, GameEndedDto d )
 	{
 		winner = d.Winner;
 
 		InvokeGameEnded( d );
 		return Task.CompletedTask;
 	}
-	Task IOnlineGameClient.ColumnFilled( ColumnFilledDto d )
+	private Task RealTimeMultiplayer_ColumnFilled( object sender, ColumnFilledDto d )
 	{
 		InvokeColumnFilled( d );
 		return Task.CompletedTask;
 	}
-	Task IOnlineGameClient.PlayerSwitched( PlayerSwitchedDto d )
+	private Task RealTimeMultiplayer_PlayerSwitched( object sender, PlayerSwitchedDto d )
 	{
 		currentPlayer = d.NewPlayer;
 
 		InvokePlayerSwitched( d );
 		return Task.CompletedTask;
 	}
-	Task IOnlineGameClient.TurnCompleted()
+	private Task RealTimeMultiplayer_TurnCompleted( object sender )
 	{
 		InvokeTurnCompleted();
 		return Task.CompletedTask;
-	}
-
-	public void Dispose()
-	{
-		foreach ( var item in disposables )
-		{
-			item.Dispose();
-		}
-		GC.SuppressFinalize( this );
 	}
 
 }

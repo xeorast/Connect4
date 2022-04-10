@@ -12,14 +12,14 @@ public partial class C4ApiConsumer
 				Player = string.Empty;
 			}
 
-			public bool IsGameIdSet => string.IsNullOrEmpty( GameId );
+			public bool IsGameIdSet => !string.IsNullOrEmpty( GameId );
 			public string GameId
 			{
 				get => this["GameId"];
 				set => this["GameId"] = value;
 			}
 
-			public bool IsPlayerSet => string.IsNullOrEmpty( Player );
+			public bool IsPlayerSet => !string.IsNullOrEmpty( Player );
 			public string Player
 			{
 				get => this["Player"];

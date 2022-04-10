@@ -1,6 +1,8 @@
-﻿using Connect4.Domain.Core;
+﻿using Connect4.Api.Shared.Exceptions;
+using Connect4.Domain.Core;
 using Connect4.Domain.Dtos.GameEvents;
 using Connect4.Multiplayer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Connect4.Api.Client;
@@ -35,6 +37,7 @@ public partial class C4ApiConsumer
 			disposables.Add( connection.OnColumnFilled( ogc.ColumnFilled ) );
 			disposables.Add( connection.OnPlayerSwitched( ogc.PlayerSwitched ) );
 			disposables.Add( connection.OnTurnCompleted( ogc.TurnCompleted ) );
+			connection.Closed += Connection_Closed;
 
 			return connection;
 		}
@@ -50,12 +53,19 @@ public partial class C4ApiConsumer
 			{
 				throw new InvalidOperationException( "Player not set" );
 			}
-			if ( HubConnection.State is not HubConnectionState.Disconnected )
-			{
-				throw new InvalidOperationException( "Already connected" );
-			}
 
-			await HubConnection.StartAsync();
+			try
+			{
+				await HubConnection.StartAsync();
+			}
+			catch ( InvalidOperationException )
+			{
+				throw;
+			}
+			catch ( HubException )
+			{
+				throw;
+			}
 		}
 		public C4ApiConsumer_Multiplayer_RealTime WithGameId( Guid uuid )
 		{
@@ -80,6 +90,7 @@ public partial class C4ApiConsumer
 		public event ColumnFilledHandler? ColumnFilled;
 		public event PlayerSwitchedHandler? PlayerSwitched;
 		public event TurnCompletedHandler? TurnCompleted;
+		public event Func<Exception?, Task>? ConnectionClosed;
 
 		async Task IOnlineGameClient.PlayerMoved( PlayerMovedDto d )
 		{
@@ -101,11 +112,44 @@ public partial class C4ApiConsumer
 		{
 			await ( TurnCompleted?.Invoke( this ) ?? Task.CompletedTask ).ConfigureAwait( false );
 		}
+		async Task Connection_Closed( Exception? arg )
+		{
+			if ( arg is HubException e )
+			{
+				if ( e.TryGetProblemDetails( out var details ) )
+				{
+					arg = new ProblemDetailsHubException( details );
+				}
+				if ( e.TryGetErorMessage( out var message ) )
+				{
+					arg = new HubException( message );
+				}
+			}
+
+			await ( ConnectionClosed?.Invoke( arg ) ?? Task.CompletedTask );
+		}
 
 		//actions
 		public async Task Move( int column )
 		{
-			await HubConnection.InvokeAsync( nameof( IOnlineGameServer.Move ), column );
+			try
+			{
+				await HubConnection.InvokeAsync( nameof( IOnlineGameServer.Move ), column );
+			}
+			catch ( HubException e )
+			when ( e.TryGetProblemDetails( out var details ) )
+			{
+				throw new ProblemDetailsHubException( details );
+			}
+			catch ( HubException e )
+			when ( e.TryGetErorMessage( out var message ) )
+			{
+				throw new HubException( message );
+			}
+			catch ( HubException )
+			{
+				throw;
+			}
 		}
 
 		// dispose

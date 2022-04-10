@@ -33,13 +33,13 @@ internal class OnlineGameWrapper : GameWrapperBase
 	{
 		if ( wasConnected )
 		{
-			throw new InvalidOperationException( "already connected" );
+			throw new InvalidOperationException( "Already connected." );
 		}
 
 		Uuid = uuid;
 
 		var game = await Api.Multiplayer.GetBoard( uuid ).ConfigureAwait( false )
-			?? throw new NullReferenceException( "game not found" );
+			?? throw new NullReferenceException( "Game not found." );
 
 		ToConnect = game.Well.ToConnect;
 		well = game.Well.Well;
@@ -66,7 +66,7 @@ internal class OnlineGameWrapper : GameWrapperBase
 		wasConnected = true;
 	}
 
-	public override async void Move( int column ) // todo: make this return Task
+	public override async Task Move( int column )
 	{
 		wasMoveCompleted = false;
 		await Api.RealTimeMultiplayer.Move( column ).ConfigureAwait( false );

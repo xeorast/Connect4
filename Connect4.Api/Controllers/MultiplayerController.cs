@@ -1,5 +1,4 @@
 ﻿using Connect4.Api.Exceptions;
-using Connect4.Api.Services;
 using Connect4.Domain.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +6,7 @@ namespace Connect4.Api.Controllers;
 
 [ApiController]
 [Route( "api/[controller]" )]
-public class MultiplayerController : ControllerBase
+public class MultiplayerController : ExtendedControllerBase
 {
 	private readonly IMultiplayerService _multiplayerService;
 
@@ -22,7 +21,7 @@ public class MultiplayerController : ControllerBase
 		var gameDto = await _multiplayerService.GetBoardAsync( uuid );
 		if ( gameDto is null )
 		{
-			return NotFound();
+			return NotFound( "Game with given uuid not found" );
 		}
 
 		return gameDto;
@@ -55,7 +54,7 @@ public class MultiplayerController : ControllerBase
 		{
 			return BadRequest( e.Message );
 		}
-		return Ok();
+		return NoContent();
 	}
 
 }

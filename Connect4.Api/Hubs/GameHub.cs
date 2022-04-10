@@ -4,9 +4,11 @@ using Connect4.Domain.Dtos.GameEvents;
 using Connect4.Multiplayer;
 using Microsoft.AspNetCore.SignalR;
 
+using PDException = Connect4.Api.Shared.Exceptions.ProblemDetailsHubException;
+
 namespace Connect4.Api.Hubs;
 
-public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
+public class GameHub : ExtendedHub<IOnlineGameClient>, IOnlineGameServer
 {
 	private readonly IMultiplayerService _multiplayerService;
 
@@ -21,7 +23,14 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 	}
 	private Guid GetGameUuid()
 	{
-		return Guid.Parse( GetGameId() ?? throw new NullReferenceException( "game id not specified" ) );
+		if ( !Guid.TryParse(
+			GetGameId() ?? throw new PDException( BadRequest( "GameId header not specified." ) ),
+			out var uuid ) )
+		{
+			throw new PDException( BadRequest( "GameId header must be a valid guid." ) );
+		}
+
+		return uuid;
 	}
 
 	private string? GetPlayerStr()
@@ -35,7 +44,14 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 	}
 	private Hue GetPlayer()
 	{
-		return Enum.Parse<Hue>( GetPlayerStr() ?? throw new NullReferenceException( "player not specified" ) );
+		if ( !Enum.TryParse<Hue>(
+			GetPlayerStr() ?? throw new PDException( BadRequest( "Player header not specified." ) ),
+			out var player ) )
+		{
+			throw new PDException( BadRequest( "Player header invalid." ) );
+		}
+
+		return player;
 	}
 
 	public GameHub( IMultiplayerService multiplayerService )
@@ -45,22 +61,15 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 
 	public override async Task OnConnectedAsync()
 	{
-		var gameId = GetGameId();
-		if ( gameId is null )
-		{
-			throw new HubException( "GameId header is required." );
-		}
-		if ( !Guid.TryParse( gameId, out var uuid ) )
-		{
-			throw new HubException( "GameId header must be a valid guid." );
-		}
+		var uuid = GetGameUuid();
+		_ = GetPlayer();
+
 		if ( !await _multiplayerService.DoesGameExist( uuid ) )
 		{
-			throw new HubException( "Game with id specified in GameId header not found." );
+			throw new PDException( NotFound( "Game with id specified in GameId header not found." ) );
 		}
 
-		await Groups.AddToGroupAsync( Context.ConnectionId, gameId );
-
+		await Groups.AddToGroupAsync( Context.ConnectionId, uuid.ToString() );
 	}
 
 	public async Task Move( int column )
@@ -72,15 +81,15 @@ public class GameHub : Hub<IOnlineGameClient>, IOnlineGameServer
 		}
 		catch ( NotFoundException e )
 		{
-			throw new HubException( e.Message );
+			throw new PDException( NotFound( e.Message ) );
 		}
 		catch ( InvalidOperationException e )
 		{
-			throw new HubException( e.Message );
+			throw new PDException( BadRequest( e.Message ) );
 		}
 		catch ( ArgumentOutOfRangeException e )
 		{
-			throw new HubException( e.Message );
+			throw new PDException( BadRequest( e.Message ) );
 		}
 
 	}

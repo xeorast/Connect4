@@ -1,15 +1,38 @@
-﻿namespace Connect4.Api.Client;
+﻿using Connect4.Api.Shared.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Json;
+
+namespace Connect4.Api.Client;
 
 internal static class ApiConsumerHelpers
 {
-	public static HttpRequestException CodeException( this HttpResponseMessage response )
+	public static async Task<HttpRequestException> ProblemDetailsOrMessageException( this HttpResponseMessage response )
 	{
+		var details = await response.Content.ReadFromJsonAsync<ProblemDetails>().ConfigureAwait( false );
+		if ( details is not null )
+		{
+			return new ProblemDetailsHttpException( details );
+		}
+
+		var message = await response.Content.ReadAsStringAsync().ConfigureAwait( false );
+		if ( message is not null )
+		{
+			return new HttpRequestException( message, null, response.StatusCode ); 
+		}
+
 		return new HttpRequestException( "unexpected status code", null, response.StatusCode );
 	}
-	public static HttpRequestException CodeException( this HttpResponseMessage response, string message )
+	public static async Task<HttpRequestException> ProblemDetailsOrMessageException( this HttpResponseMessage response, string message )
 	{
+		var details = await response.Content.ReadFromJsonAsync<ProblemDetails>().ConfigureAwait( false );
+		if ( details is not null )
+		{
+			return new ProblemDetailsHttpException( details );
+		}
+
 		return new HttpRequestException( message, null, response.StatusCode );
 	}
+
 }
 
 public partial class C4ApiConsumer

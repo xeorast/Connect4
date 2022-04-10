@@ -60,12 +60,13 @@ public class LocalGameWrapper : GameWrapperBase
 	private void Game_TurnCompleted( Game sender ) => InvokeTurnCompleted();
 
 
-	public override void Move( int column )
+	public override Task Move( int column )
 	{
 		if ( IsNowPlayer )
 		{
 			_ = Game.Move( column );
 		}
+		return Task.CompletedTask;
 	}
 
 	public override async void MoveBot( TimeSpan minMoveTime )

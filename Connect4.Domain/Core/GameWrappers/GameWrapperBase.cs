@@ -65,7 +65,7 @@ public abstract class GameWrapperBase
 	protected void InvokePlayerSwitched( PlayerSwitchedDto d ) => PlayerSwitched?.Invoke( this, d );
 	protected void InvokeTurnCompleted() => TurnCompleted?.Invoke( this, EventArgs.Empty );
 
-	public abstract void Move( int column );
+	public abstract Task Move( int column );
 	public abstract void MoveBot( TimeSpan minMoveTime );
 	public abstract IEnumerable<Coordinate> GetWinning();
 

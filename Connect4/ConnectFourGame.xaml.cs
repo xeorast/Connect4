@@ -254,13 +254,13 @@ public partial class ConnectFourGame : UserControl
 	/// </summary>
 	/// <param name="sender">button with <see cref="System.Windows.FrameworkElement.Tag"/> set to column index</param>
 	/// <param name="e"></param>
-	private void Column_Click( object sender, RoutedEventArgs e )
+	private async void Column_Click( object sender, RoutedEventArgs e )
 	{
 		if ( CanMove )
 		{
 			var btn = (Button)sender;
 			var col = (int)btn.Tag;
-			GameWrapper.Move( col );
+			await GameWrapper.Move( col );
 		}
 
 	}

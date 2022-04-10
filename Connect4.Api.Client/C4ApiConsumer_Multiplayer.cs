@@ -16,9 +16,13 @@ public partial class C4ApiConsumer
 
 			return response.StatusCode switch
 			{
-				HttpStatusCode.OK => await response.Content.ReadFromJsonAsync<GameDto>().ConfigureAwait( false ),
-				HttpStatusCode.NotFound => null,
-				_ => throw response.CodeException(),
+				HttpStatusCode.OK =>
+					await response.Content.ReadFromJsonAsync<GameDto>().ConfigureAwait( false ),
+
+				HttpStatusCode.NotFound =>
+					null,
+
+				_ => throw await response.ProblemDetailsOrMessageException(),
 			};
 		}
 
@@ -28,8 +32,10 @@ public partial class C4ApiConsumer
 
 			return response.StatusCode switch
 			{
-				HttpStatusCode.Created => await response.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false ),
-				_ => throw response.CodeException(),
+				HttpStatusCode.Created =>
+					await response.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false ),
+
+				_ => throw await response.ProblemDetailsOrMessageException()
 			};
 		}
 
@@ -37,11 +43,16 @@ public partial class C4ApiConsumer
 		{
 			var response = await Http.PostAsJsonAsync( $"api/multiplayer/{uuid}", column ).ConfigureAwait( false );
 
-			if ( response.StatusCode is HttpStatusCode.OK )
+			switch ( response.StatusCode )
 			{
-				return;
+				case HttpStatusCode.NoContent:
+					return;
+
+				case HttpStatusCode.NotFound:
+				case HttpStatusCode.BadRequest:
+				default:
+					throw await response.ProblemDetailsOrMessageException();
 			}
-			throw response.CodeException( await response.Content.ReadAsStringAsync().ConfigureAwait( false ) );
 		}
 
 	}

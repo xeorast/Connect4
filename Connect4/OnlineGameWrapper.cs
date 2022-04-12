@@ -5,9 +5,9 @@ using Connect4.Domain.Dtos.GameEvents;
 
 namespace Connect4;
 
-internal class OnlineGameWrapper : GameWrapperBase
+public class OnlineGameWrapper : GameWrapperBase, IAsyncDisposable
 {
-	C4ApiConsumer Api { get; }
+	public C4ApiConsumer Api { get; set; }
 
 	public override Hue this[Coordinate cord] => well[cord.Column, cord.Row];
 	public override Hue CurrentPlayer => currentPlayer;
@@ -110,6 +110,12 @@ internal class OnlineGameWrapper : GameWrapperBase
 	{
 		InvokeTurnCompleted();
 		return Task.CompletedTask;
+	}
+
+	public ValueTask DisposeAsync()
+	{
+		GC.SuppressFinalize( this );
+		return ( (IAsyncDisposable)Api ).DisposeAsync();
 	}
 
 }

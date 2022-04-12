@@ -9,10 +9,8 @@ namespace Connect4.Api.Client;
 
 public partial class C4ApiConsumer
 {
-	public partial class C4ApiConsumer_Multiplayer_RealTime : C4ApiConsumer_Child, IOnlineGameClient, IDisposable
+	public partial class C4ApiConsumer_Multiplayer_RealTime : C4ApiConsumer_RealTimeChild, IOnlineGameClient
 	{
-		HubConnection HubConnection => hubConnection.Value;
-		private readonly Lazy<HubConnection> hubConnection;
 		MultiplayerRealTime_Headers Headers => headers.Value;
 		private readonly Lazy<MultiplayerRealTime_Headers> headers;
 
@@ -21,14 +19,19 @@ public partial class C4ApiConsumer
 			: base( api )
 		{
 			headers = new( () => new() );
-			hubConnection = new( ConfigureConnection );
 		}
-		private HubConnection ConfigureConnection()
+
+		protected override HubConnection ConfigureConnection()
 		{
 			var connection = new HubConnectionBuilder()
 				.WithUrl(
 				new Uri( Api.BaseAddress, "/multiplayer" ),
 				   options => options.Headers = Headers )
+				//options => options.Headers = new MultiplayerRealTime_Headers()
+				//{
+				// GameId = "92cdbcc0-9a6f-4312-a425-b756732b24a7",
+				// Player = "1",
+				//} )
 				.Build();
 
 			var ogc = (IOnlineGameClient)this;
@@ -43,7 +46,7 @@ public partial class C4ApiConsumer
 		}
 
 		// connecting
-		public async Task ConnectAsync()
+		public override async Task ConnectAsync()
 		{
 			if ( !Headers.IsGameIdSet )
 			{
@@ -66,6 +69,10 @@ public partial class C4ApiConsumer
 			{
 				throw;
 			}
+		}
+		public override async Task DisconnectAsync()
+		{
+			await HubConnection.StopAsync();
 		}
 		public C4ApiConsumer_Multiplayer_RealTime WithGameId( Guid uuid )
 		{
@@ -153,14 +160,15 @@ public partial class C4ApiConsumer
 		}
 
 		// dispose
-		public void Dispose()
+		protected override ValueTask DisposeAsyncInteral()
 		{
 			foreach ( var item in disposables )
 			{
 				item.Dispose();
 			}
-			GC.SuppressFinalize( this );
+			return base.DisposeAsyncInteral();
 		}
+
 		private readonly List<IDisposable> disposables = new();
 
 	}

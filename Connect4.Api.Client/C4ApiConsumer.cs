@@ -17,7 +17,7 @@ internal static class ApiConsumerHelpers
 		var message = await response.Content.ReadAsStringAsync().ConfigureAwait( false );
 		if ( message is not null )
 		{
-			return new HttpRequestException( message, null, response.StatusCode ); 
+			return new HttpRequestException( message, null, response.StatusCode );
 		}
 
 		return new HttpRequestException( "unexpected status code", null, response.StatusCode );
@@ -35,7 +35,7 @@ internal static class ApiConsumerHelpers
 
 }
 
-public partial class C4ApiConsumer
+public partial class C4ApiConsumer : IAsyncDisposable
 {
 	public Uri BaseAddress { get; }
 	private HttpClient Http => httpClient.Value;
@@ -45,6 +45,7 @@ public partial class C4ApiConsumer
 	private readonly Lazy<C4ApiConsumer_Multiplayer> multiplayer;
 	public C4ApiConsumer_Multiplayer_RealTime RealTimeMultiplayer => realTimeMultiplayer.Value;
 	private readonly Lazy<C4ApiConsumer_Multiplayer_RealTime> realTimeMultiplayer;
+	private bool disposedValue;
 
 	public C4ApiConsumer( string baseAddress ) : this( new Uri( baseAddress ) ) { }
 	public C4ApiConsumer( Uri baseAddress )
@@ -55,4 +56,35 @@ public partial class C4ApiConsumer
 		realTimeMultiplayer = new( () => new( this ) );
 	}
 
+	protected virtual async ValueTask DisposeAsync( bool disposing )
+	{
+		if ( !disposedValue )
+		{
+			if ( disposing )
+			{
+				if ( httpClient.IsValueCreated )
+				{
+					( (IDisposable)httpClient.Value ).Dispose();
+				}
+			}
+
+			// treating this as unmanages since it will not dispose itself
+			if ( realTimeMultiplayer.IsValueCreated )
+			{
+				await ( (IAsyncDisposable)realTimeMultiplayer.Value ).DisposeAsync().ConfigureAwait( false );
+			}
+			disposedValue = true;
+		}
+	}
+
+	~C4ApiConsumer()
+	{
+		DisposeAsync( disposing: false ).AsTask().GetAwaiter().GetResult();
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await DisposeAsync( disposing: true );
+		GC.SuppressFinalize( this );
+	}
 }

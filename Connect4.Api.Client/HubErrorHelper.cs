@@ -28,7 +28,7 @@ internal static class HubErrorHelper
 			return null;
 		}
 
-		return JsonSerializer.Deserialize<ProblemDetails>( match.Groups["message"].Value );
+		return JsonSerializer.Deserialize<ProblemDetails>( match.Groups["message"].Value, new JsonSerializerOptions { PropertyNameCaseInsensitive = true } );
 	}
 
 	public static bool TryGetErorMessage( this HubException exception, [NotNullWhen( true )] out string? message )

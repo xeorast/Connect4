@@ -72,7 +72,8 @@ public partial class C4ApiConsumer
 
 			if ( hubConnection is { IsValueCreated: true, Value: var h} )
 			{
-				await ( (IAsyncDisposable)h ).DisposeAsync().ConfigureAwait( false );
+				//await ( (IAsyncDisposable)h ).DisposeAsync().AsTask().ConfigureAwait( false );
+				await Task.Run( () => ( (IAsyncDisposable)h ).DisposeAsync().AsTask() ).ConfigureAwait( false );
 			}
 			GC.SuppressFinalize( this );
 		}

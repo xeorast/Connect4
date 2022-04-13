@@ -62,6 +62,16 @@ public partial class ConnectFourGame : UserControl
 		HideWinner();
 
 		// game
+		switch ( GameWrapper )
+		{
+			case IAsyncDisposable ad:
+				ad.DisposeAsync().AsTask().GetAwaiter().GetResult();
+				break;
+			case IDisposable d:
+				d.Dispose();
+				break;
+		}
+
 		GameWrapper = wrapper
 			?? new LocalGameWrapper( columns, rows, StartingPlayer, (GameWrapperBase.GameMode)UserSettings.Default.GameMode );
 

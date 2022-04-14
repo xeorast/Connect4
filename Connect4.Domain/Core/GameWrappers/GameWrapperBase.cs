@@ -13,7 +13,7 @@ public struct Coordinate
 	}
 	public static explicit operator Coordinate( (int column, int row) s )
 	{
-		return new Coordinate { Row = s.column, Column = s.row };
+		return new Coordinate { Column = s.column, Row = s.row };
 	}
 }
 

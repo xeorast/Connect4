@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace Connect4.Domain.Models;
 
-[Index( nameof( Uuid ) )]
+[Index( nameof( Uuid ), IsUnique = true )]
 public class GameModel
 {
 	public GameModel( Guid uuid, string wellState )
@@ -38,9 +38,10 @@ public class GameModel
 	public Hue CurrentPlayer { get; set; }
 
 	public int ToConnect { get; set; }
+
 	[NotMapped]
 	public Hue[,] Well { get; set; }
-	[MemberNotNull( nameof( Well ) )]
+	
 	[EditorBrowsable( EditorBrowsableState.Never )]
 	public string WellState
 	{
@@ -48,6 +49,7 @@ public class GameModel
 		{
 			return JsonSerializer.Serialize( Well ?? throw new NullReferenceException( "game was null" ), Array2DJsonConverter<Hue>.OptionsWithConverter );
 		}
+		[MemberNotNull( nameof( Well ) )]
 		set
 		{
 			Well = JsonSerializer.Deserialize<Hue[,]>( value, Array2DJsonConverter<Hue>.OptionsWithConverter )
@@ -69,7 +71,7 @@ public class GameModel
 				new Well( Well, ToConnect )
 				);
 
-			return GameInstance; 
+			return GameInstance;
 		}
 	}
 

@@ -43,10 +43,14 @@ public class MultiplayerService : IMultiplayerService
 
 	async Task<Guid> IMultiplayerService.CreateGameAsync()
 	{
-		GameModel game = new( Guid.NewGuid(), new Game() );
+		using var tran = _dbContext.Database.BeginTransaction( System.Data.IsolationLevel.Serializable );
+		
+		GameModel game = new( await GetFreeUuidAsync(), new Game() );
 
 		_ = _dbContext.Add( game );
 		_ = await _dbContext.SaveChangesAsync();
+
+		await tran.CommitAsync();
 
 		return game.Uuid;
 	}
@@ -118,6 +122,17 @@ public class MultiplayerService : IMultiplayerService
 		game.ColumnFilled += events.ColumnFilled;
 		game.PlayerSwitched += events.PlayerSwitched;
 		game.TurnCompleted += events.TurnCompleted;
+	}
+
+	private async Task<Guid> GetFreeUuidAsync()
+	{
+		Guid uuid;
+		do
+		{
+			uuid = Guid.NewGuid();
+		} while ( await _dbContext.Games.AnyAsync( x => x.Uuid == uuid ) );
+
+		return uuid;
 	}
 
 }

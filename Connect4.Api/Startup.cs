@@ -1,6 +1,8 @@
 ﻿using Connect4.Api.Hubs;
+using Connect4.Api.Middleware;
 using Connect4.Data;
 using Connect4.Domain.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 namespace Connect4.Api;
@@ -10,6 +12,8 @@ public class Startup
 	// Add services to the container.
 	public static void ConfigureServices( WebApplicationBuilder builder )
 	{
+		_ = builder.Configuration.AddEnvironmentVariables();
+
 		// database
 		switch ( builder.Configuration["dbProvider"] )
 		{
@@ -17,7 +21,7 @@ public class Startup
 				_ = builder.Services.AddNpgsql<AppDbContext>(
 					builder.Configuration.GetConnectionString( "postgresConnection" ),
 					pgob => pgob.MigrationsAssembly( "Connect4.Migrations.Pg" ),
-					ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
+					ConfigureDatabase
 					);
 				break;
 
@@ -26,9 +30,17 @@ public class Startup
 				_ = builder.Services.AddSqlServer<AppDbContext>(
 					builder.Configuration.GetConnectionString( "mssqlConnection" ),
 					ssob => ssob.MigrationsAssembly( "Connect4.Migrations.MsSql" ),
-					ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
+					ConfigureDatabase
 					);
 				break;
+		}
+
+		void ConfigureDatabase( DbContextOptionsBuilder options )
+		{
+			if ( builder.Environment.IsDevelopment() )
+			{
+				_ = options.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) );
+			}
 		}
 
 		// services
@@ -56,11 +68,19 @@ public class Startup
 			_ = app.UseSwaggerUI();
 		}
 
+		_ = app.UseMiddleware<ProxyHttpsDetectionMiddleware>();
+
 		_ = app.UseHttpsRedirection();
 
 		_ = app.UseAuthorization();
 
 		_ = app.MapControllers();
 		_ = app.MapHub<GameHub>( "/multiplayer" );
+
+		if ( app.Configuration["PORT"] is not null and var port )
+		{
+			app.Urls.Add( $"http://*:{port}" );
+		}
+
 	}
 }

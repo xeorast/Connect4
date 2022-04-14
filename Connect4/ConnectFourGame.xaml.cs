@@ -35,7 +35,7 @@ public partial class ConnectFourGame : UserControl
 			null
 			: (Tokens[GameWrapper.PreviousMove.Value.Column, GameWrapper.PreviousMove.Value.Row], GameWrapper[GameWrapper.PreviousMove.Value]);
 
-	bool CanMove => GameWrapper is GameWrapperBase { IsNowPlayer: true, CanMove: true, HasEnded: false };
+	bool CanMove => GameWrapper is { IsNowPlayer: true, CanMove: true, HasEnded: false };
 
 	public ConnectFourGame()
 	{

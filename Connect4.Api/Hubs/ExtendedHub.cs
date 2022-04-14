@@ -8,21 +8,20 @@ public class ExtendedHub<T> : Hub<T> where T : class
 {
 	public ProblemDetailsFactory? ProblemDetailsFactory
 	{
-		get => _problemDetailsFactory ??= Context.GetHttpContext()?.RequestServices?.GetRequiredService<ProblemDetailsFactory>();
+		get => _problemDetailsFactory ??= HttpContext?.RequestServices?.GetRequiredService<ProblemDetailsFactory>();
 		set => _problemDetailsFactory = value ?? throw new ArgumentNullException( nameof( value ) );
 	}
 	private ProblemDetailsFactory? _problemDetailsFactory;
 
-	protected HttpContext? HttpContext
+	public HttpContext? HttpContext
 	{
 		get => _httpContext ??= Context.GetHttpContext();
-		set => _httpContext = value ?? throw new ArgumentNullException( nameof( value ) );
 	}
-	protected HttpContext? _httpContext;
+	private HttpContext? _httpContext;
 
 	private ProblemDetails CreateProblemDetails( int? statusCode = null, string? title = null, string? type = null, string? detail = null, string? instance = null )
 	{
-		if ( this is ExtendedHub<T> { HttpContext: not null, ProblemDetailsFactory: not null } )
+		if ( this is { HttpContext: not null, ProblemDetailsFactory: not null } )
 		{
 			return ProblemDetailsFactory.CreateProblemDetails( HttpContext, statusCode, title, type, detail, instance );
 		}

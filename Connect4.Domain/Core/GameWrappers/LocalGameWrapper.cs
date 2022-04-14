@@ -83,7 +83,9 @@ public class LocalGameWrapper : GameWrapperBase
 
 	public override IEnumerable<Coordinate> GetWinning()
 	{
-		return Game.CloneWell().GetWinning().Select( c => new Coordinate { Column = c.col, Row = c.row } );
+		return Game.CloneWell()
+			.GetWinning()
+			.Select( c => (Coordinate)c );
 	}
 
 	private static GameBot Bot( Hue hue, int maxLevel )

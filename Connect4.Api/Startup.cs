@@ -10,13 +10,31 @@ public class Startup
 	// Add services to the container.
 	public static void ConfigureServices( WebApplicationBuilder builder )
 	{
-		_ = builder.Services.AddSqlServer<AppDbContext>(
-			builder.Configuration.GetConnectionString( "mssqlConnection" ),
-			ssob => ssob.MigrationsAssembly( "Connect4.Migrations.MsSql" ),
-			ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
-			);
+		// database
+		switch ( builder.Configuration["dbProvider"] )
+		{
+			case "postgres":
+				_ = builder.Services.AddNpgsql<AppDbContext>(
+					builder.Configuration.GetConnectionString( "postgresConnection" ),
+					pgob => pgob.MigrationsAssembly( "Connect4.Migrations.Pg" ),
+					ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
+					);
+				break;
+
+			case "sqlServer":
+			default:
+				_ = builder.Services.AddSqlServer<AppDbContext>(
+					builder.Configuration.GetConnectionString( "mssqlConnection" ),
+					ssob => ssob.MigrationsAssembly( "Connect4.Migrations.MsSql" ),
+					ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
+					);
+				break;
+		}
+
+		// services
 		_ = builder.Services.AddScoped<IMultiplayerService, MultiplayerService>();
 
+		// endpoints
 		_ = builder.Services.AddControllers();
 		_ = builder.Services.AddSignalR();
 

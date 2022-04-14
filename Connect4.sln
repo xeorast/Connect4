@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connect4.Multiplayer", "Con
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connect4.Api.Client", "Connect4.Api.Client\Connect4.Api.Client.csproj", "{BD08BA89-4050-4420-BF0C-8CCC63A54E9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Connect4.Api.Shared", "Connect4.Api.Shared\Connect4.Api.Shared.csproj", "{690F21DC-9A43-40D2-8E44-630B7A5A7610}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Connect4.Api.Shared", "Connect4.Api.Shared\Connect4.Api.Shared.csproj", "{690F21DC-9A43-40D2-8E44-630B7A5A7610}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Connect4.Migrations.Pg", "Connect4.Migrations.Pg\Connect4.Migrations.Pg.csproj", "{F593D642-5FF4-447C-93DB-EB5C2BE3C8B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{690F21DC-9A43-40D2-8E44-630B7A5A7610}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{690F21DC-9A43-40D2-8E44-630B7A5A7610}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{690F21DC-9A43-40D2-8E44-630B7A5A7610}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F593D642-5FF4-447C-93DB-EB5C2BE3C8B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F593D642-5FF4-447C-93DB-EB5C2BE3C8B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F593D642-5FF4-447C-93DB-EB5C2BE3C8B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F593D642-5FF4-447C-93DB-EB5C2BE3C8B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

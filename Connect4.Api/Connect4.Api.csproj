@@ -15,6 +15,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="npgsql.entityframeworkcore.postgresql" Version="6.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\Connect4.Data\Connect4.Data.csproj" />
     <ProjectReference Include="..\Connect4.Domain\Connect4.Domain.csproj" />
     <ProjectReference Include="..\Connect4.Migrations.MsSql\Connect4.Migrations.MsSql.csproj" />
+    <ProjectReference Include="..\Connect4.Migrations.Pg\Connect4.Migrations.Pg.csproj" />
     <ProjectReference Include="..\Connect4.Multiplayer\Connect4.Multiplayer.csproj" />
   </ItemGroup>
 

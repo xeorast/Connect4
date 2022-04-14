@@ -1,46 +1,12 @@
 global using Connect4.Api.Services;
-using Connect4.Api.Hubs;
-using Connect4.Data;
-using Connect4.Domain.Core;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Connect4.Api;
 
 var builder = WebApplication.CreateBuilder( args );
 
-// Add services to the container.
-
-builder.Services.AddSqlServer<AppDbContext>(
-	builder.Configuration.GetConnectionString( "mssqlConnection" ),
-	ssob => ssob.MigrationsAssembly( "Connect4.Migrations.MsSql" ),
-	ob => ob.UseLoggerFactory( LoggerFactory.Create( factoryBuilder => factoryBuilder.AddConsole() ) )
-	);
-builder.Services.AddScoped<IMultiplayerService, MultiplayerService>();
-
-builder.Services.AddControllers();
-builder.Services.AddSignalR();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen( c =>
-{
-	OpenApiSchema num = new() { Reference = new() { Id = "Hue", Type = ReferenceType.Schema } };
-	OpenApiSchema arr = new() { Title = "Hue array", Type = "array", Items = num };
-	c.MapType<Hue[,]>( () => new OpenApiSchema() { Title = "2D Hue array", Type = "array", Items = arr } );
-} );
+Startup.ConfigureServices( builder );
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if ( app.Environment.IsDevelopment() )
-{
-	_ = app.UseSwagger();
-	_ = app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-app.MapHub<GameHub>( "/multiplayer" );
+Startup.Configure( app );
 
 app.Run();

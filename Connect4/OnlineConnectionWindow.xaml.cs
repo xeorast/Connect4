@@ -1,4 +1,5 @@
-﻿using Connect4.Domain.Core;
+﻿using Connect4.Api.Client;
+using Connect4.Domain.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +51,7 @@ public partial class OnlineConnectionWindow : Window
 		e.CanExecute = SelectedUuid is not null;
 	}
 
+	readonly C4ApiConsumer api = new( App.ApiPath );
 	private async void Connect_Executed( object sender, ExecutedRoutedEventArgs e )
 	{
 		if ( SelectedUuid is null || !await CheckExists() )
@@ -70,16 +72,18 @@ public partial class OnlineConnectionWindow : Window
 		Close();
 	}
 
-	HttpClient Http { get; } = new() { BaseAddress = new( "https://localhost:7126" ) };
 	async Task<bool> CheckExists()
 	{
-		var resp = await Http.GetAsync( $"/api/multiplayer/{SelectedUuid}" ).ConfigureAwait( false );
-		return resp.IsSuccessStatusCode;
+		if ( SelectedUuid is Guid uuid )
+		{
+			var board = await api.Multiplayer.GetBoard( uuid );
+			return board is not null;
+		}
+		return false;
 	}
 	async Task<Guid> CreateNew()
 	{
-		var createGameResp = await Http.PostAsync( "api/multiplayer", null ).ConfigureAwait( false );
-		return await createGameResp.Content.ReadFromJsonAsync<Guid>().ConfigureAwait( false );
+		return await api.Multiplayer.CreateGame();
 	}
 
 }

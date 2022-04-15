@@ -24,7 +24,7 @@ public class OnlineGameWrapper : GameWrapperBase, IAsyncDisposable
 	public OnlineGameWrapper( Hue player )
 	{
 		well = null!;
-		Api = new( "https://localhost:7126" );
+		Api = new( App.ApiPath );
 		BoundPlayer = player;
 	}
 
@@ -66,8 +66,18 @@ public class OnlineGameWrapper : GameWrapperBase, IAsyncDisposable
 		wasConnected = true;
 	}
 
+	private void ThrowIfNotConnected()
+	{
+		if ( !wasConnected )
+		{
+			throw new InvalidOperationException( "Connection closed. Open connection before sending requests." );
+		}
+	}
+
 	public override async Task Move( int column )
 	{
+		ThrowIfNotConnected();
+
 		wasMoveCompleted = false;
 		await Api.RealTimeMultiplayer.Move( column ).ConfigureAwait( false );
 		wasMoveCompleted = true;
@@ -75,6 +85,8 @@ public class OnlineGameWrapper : GameWrapperBase, IAsyncDisposable
 	public override void MoveBot( TimeSpan minMoveTime ) => throw new NotImplementedException(); // as for now (only two players possible) there is no point in online with bot
 	public override IEnumerable<Coordinate> GetWinning()
 	{
+		ThrowIfNotConnected();
+
 		return new Well( well, ToConnect )
 			.GetWinning()
 			.Select( c => (Coordinate)c );

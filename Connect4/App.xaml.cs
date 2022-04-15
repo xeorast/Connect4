@@ -6,4 +6,5 @@ namespace Connect4;
 /// </summary>
 public partial class App : Application
 {
+	public static readonly Uri ApiPath = new( "https://localhost:7126" );
 }

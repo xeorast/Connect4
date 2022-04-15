@@ -51,7 +51,7 @@ public partial class C4ApiConsumer : IAsyncDisposable
 	public C4ApiConsumer( Uri baseAddress )
 	{
 		BaseAddress = baseAddress;
-		httpClient = new( () => new() { BaseAddress = new( "https://localhost:7126" ) } );
+		httpClient = new( () => new() { BaseAddress = BaseAddress } );
 		multiplayer = new( () => new( this ) );
 		realTimeMultiplayer = new( () => new( this ) );
 	}
